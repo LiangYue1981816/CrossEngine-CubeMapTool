@@ -62,6 +62,10 @@ void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int color, glm:
 	float g = GET_GRN(color) / 255.0f;
 	float b = GET_BLU(color) / 255.0f;
 
+	r = pow(r, 1.0f / 2.2f);
+	g = pow(g, 1.0f / 2.2f);
+	b = pow(b, 1.0f / 2.2f);
+
 	SHBasis(basis, direction);
 
 	for (int index = 0; index < 16; index++) {
@@ -199,6 +203,7 @@ BOOL GenerateIrradianceMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
 				direction.xyz = normalize(direction.xyz);                                           \n\
 				gl_FragColor.rgb = SH(direction.xyz);                                               \n\
+				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
 		";
 

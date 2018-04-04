@@ -83,7 +83,7 @@ BOOL GenerateMipmaps(CUBEMAP *pEnvMap, CUBEMAP pMipmaps[], int mipLevels, int sa
 					float ndotl = max(dot(N, L), 0.0f);                                             \n\
 																									\n\
 					if (ndotl > 0.0f) {                                                             \n\
-						color += texture(envmap, L).rgb * ndotl;                                    \n\
+						color += pow(texture(envmap, L).rgb, vec3(1.0f / 2.2f)) * ndotl;            \n\
 						weight += ndotl;                                                            \n\
 					}                                                                               \n\
 				}                                                                                   \n\
@@ -97,6 +97,7 @@ BOOL GenerateMipmaps(CUBEMAP *pEnvMap, CUBEMAP pMipmaps[], int mipLevels, int sa
 				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
 				direction.xyz = normalize(direction.xyz);                                           \n\
 				gl_FragColor.rgb = Sampling(_envmap, direction.xyz, _roughness, _samples);          \n\
+				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
 		";
 

@@ -3,26 +3,41 @@
 
 #pragma region SH
 
-static const float factors[16] = {
+// https://cseweb.ucsd.edu/~ravir/papers/invlamb/josa.pdf
+// http://cseweb.ucsd.edu/~ravir/papers/envmap/envmap.pdf
+
+static const float a[9] = {
+	// L0
+	0.88622702317327315839103888423359f,
+
+	// L1
+	1.0233266579169159691709160221495f,
+	1.0233266579169159691709160221495f,
+	1.0233266579169159691709160221495f,
+
+	// L2
+	0.49541580913239741539330368514174f,
+	0.49541580913239741539330368514174f,
+	0.49541580913239741539330368514174f,
+	0.49541580913239741539330368514174f,
+	0.49541580913239741539330368514174f
+};
+
+static const float factors[9] = {
+	// L0
 	0.28209479177387814347403972578039f,
 
+	// L1
 	0.48860251190291992158638462283835f,
 	0.48860251190291992158638462283835f,
 	0.48860251190291992158638462283835f,
 
+	// L2
 	0.31539156525252000603089369029571f,
 	1.0925484305920790705433857058027f,
 	1.0925484305920790705433857058027f,
 	0.54627421529603953527169285290134f,
-	0.54627421529603953527169285290134f,
-
-	0.373176332590115391414395913199f,
-	0.45704579946446573615802069691665f,
-	0.45704579946446573615802069691665f,
-	1.445305721320277027694690077199f,
-	2.890611442640554055389380154398f,
-	0.5900435899266435103456102775415f,
-	0.5900435899266435103456102775415f
+	0.54627421529603953527169285290134f
 };
 
 void SHBasis(float basis[], glm::vec3 direction)
@@ -44,19 +59,11 @@ void SHBasis(float basis[], glm::vec3 direction)
 	basis[6] = factors[6] * (y * z);
 	basis[7] = factors[7] * (x * x - y * y);
 	basis[8] = factors[8] * (x * y);
-
-	basis[9] = factors[9] * (z * z * 2.0f - x * x * 3.0f - y * y * 3.0f) * z;
-	basis[10] = factors[10] * (z * z * 5.0f - 1.0f) * x;
-	basis[11] = factors[11] * (z * z * 5.0f - 1.0f) * y;
-	basis[12] = factors[12] * (x * x - y * y) * z;
-	basis[13] = factors[13] * (x * y * z);
-	basis[14] = factors[14] * (x * x - y * y * 3.0f) * x;
-	basis[15] = factors[15] * (x * x * 3.0f - y * y) * y;
 }
 
 void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int color, glm::vec3 direction)
 {
-	float basis[16] = { 0.0f };
+	float basis[9] = { 0.0f };
 
 	float r = GET_RED(color) / 255.0f;
 	float g = GET_GRN(color) / 255.0f;
@@ -68,7 +75,7 @@ void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int color, glm:
 
 	SHBasis(basis, direction);
 
-	for (int index = 0; index < 16; index++) {
+	for (int index = 0; index < 9; index++) {
 		sh_red[index] += basis[index] * r;
 		sh_grn[index] += basis[index] * g;
 		sh_blu[index] += basis[index] * b;
@@ -119,10 +126,10 @@ void GenerateIrradianceSH(CUBEMAP *pEnvMap, float *sh_red, float *sh_grn, float 
 		SH(sh_red, sh_grn, sh_blu, color, direction);
 	}
 
-	for (int index = 0; index < 16; index++) {
-		sh_red[index] *= factors[index] * PI * 4.0f / samples;
-		sh_grn[index] *= factors[index] * PI * 4.0f / samples;
-		sh_blu[index] *= factors[index] * PI * 4.0f / samples;
+	for (int index = 0; index < 9; index++) {
+		sh_red[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_grn[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_blu[index] *= a[index] * factors[index] * PI * 4.0f / samples;
 	}
 }
 
@@ -150,9 +157,9 @@ BOOL GenerateIrradianceMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
-			uniform float _sh_red[16];                                                              \n\
-			uniform float _sh_grn[16];                                                              \n\
-			uniform float _sh_blu[16];                                                              \n\
+			uniform float _sh_red[9];                                                               \n\
+			uniform float _sh_grn[9];                                                               \n\
+			uniform float _sh_blu[9];                                                               \n\
 																									\n\
 			uniform mat4 _texcoordMatrix;                                                           \n\
 																									\n\
@@ -160,7 +167,7 @@ BOOL GenerateIrradianceMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 																									\n\
 			vec3 SH(vec3 direction)                                                                 \n\
 			{                                                                                       \n\
-				float basis[16];                                                                    \n\
+				float basis[9];                                                                     \n\
 																									\n\
 				float x = direction.x;                                                              \n\
 				float y = direction.y;                                                              \n\
@@ -180,15 +187,7 @@ BOOL GenerateIrradianceMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 				basis[7] = (x * x - y * y);                                                         \n\
 				basis[8] = (x * y);                                                                 \n\
 																									\n\
-				basis[9]  = (z * z * 2.0f - x * x * 3.0f - y * y * 3.0f) * z;                       \n\
-				basis[10] = (z * z * 5.0f - 1.0f) * x;                                              \n\
-				basis[11] = (z * z * 5.0f - 1.0f) * y;                                              \n\
-				basis[12] = (x * x - y * y) * z;                                                    \n\
-				basis[13] = (x * y * z);                                                            \n\
-				basis[14] = (x * x - y * y * 3.0f) * x;                                             \n\
-				basis[15] = (x * x * 3.0f - y * y) * y;                                             \n\
-																									\n\
-				for (int index = 0; index < 16; index++)                                            \n\
+				for (int index = 0; index < 9; index++)                                             \n\
 				{                                                                                   \n\
 					color.r += _sh_red[index] * basis[index];                                       \n\
 					color.g += _sh_grn[index] * basis[index];                                       \n\
@@ -221,9 +220,9 @@ BOOL GenerateIrradianceMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 	if (CreateFBO(CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap)) == FALSE) goto ERR;
 	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
-		float sh_red[16] = { 0.0f };
-		float sh_grn[16] = { 0.0f };
-		float sh_blu[16] = { 0.0f };
+		float sh_red[9] = { 0.0f };
+		float sh_grn[9] = { 0.0f };
+		float sh_blu[9] = { 0.0f };
 		GenerateIrradianceSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
 
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -250,9 +249,9 @@ BOOL GenerateIrradianceMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 			glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
 
 			glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
-			glUniform1fv(uniformLocationSHRed, 16, sh_red);
-			glUniform1fv(uniformLocationSHGrn, 16, sh_grn);
-			glUniform1fv(uniformLocationSHBlu, 16, sh_blu);
+			glUniform1fv(uniformLocationSHRed, 9, sh_red);
+			glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
+			glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
 
 			for (int index = 0; index < 6; index++)
 			{

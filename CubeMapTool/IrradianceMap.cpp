@@ -118,6 +118,40 @@ glm::vec3 Sampling(glm::vec2 xi)
 
 #pragma region IrradianceMap
 
+void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
+{
+	if (FILE *pFile = fopen(szFileName, "wb")) {
+		fprintf(pFile, "float sh_red[9] = {");
+		{
+			for (int index = 0; index < 9; index++) {
+				fprintf(pFile, "%ff", sh_red[index]);
+				if (index < 8) fprintf(pFile, ", ");
+			}
+		}
+		fprintf(pFile, "};\n");
+
+		fprintf(pFile, "float sh_grn[9] = {");
+		{
+			for (int index = 0; index < 9; index++) {
+				fprintf(pFile, "%ff", sh_grn[index]);
+				if (index < 8) fprintf(pFile, ", ");
+			}
+		}
+		fprintf(pFile, "};\n");
+
+		fprintf(pFile, "float sh_blu[9] = {");
+		{
+			for (int index = 0; index < 9; index++) {
+				fprintf(pFile, "%ff", sh_blu[index]);
+				if (index < 8) fprintf(pFile, ", ");
+			}
+		}
+		fprintf(pFile, "};\n");
+
+		fclose(pFile);
+	}
+}
+
 void GenerateIrradianceSH(CUBEMAP *pEnvMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
@@ -224,6 +258,7 @@ BOOL GenerateIrradianceMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 		float sh_grn[9] = { 0.0f };
 		float sh_blu[9] = { 0.0f };
 		GenerateIrradianceSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
+		SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
 
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);

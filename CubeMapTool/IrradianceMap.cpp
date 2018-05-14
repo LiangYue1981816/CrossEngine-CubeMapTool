@@ -121,32 +121,20 @@ glm::vec3 Sampling(glm::vec2 xi)
 void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	if (FILE *pFile = fopen(szFileName, "wb")) {
-		fprintf(pFile, "float sh_red[9] = {");
-		{
-			for (int index = 0; index < 9; index++) {
-				fprintf(pFile, "%ff", sh_red[index]);
-				if (index < 8) fprintf(pFile, ", ");
-			}
+		for (int index = 0; index < 9; index++) {
+			fprintf(pFile, "%f", sh_red[index]);
+			fprintf(pFile, index < 8 ? " " : "\n");
 		}
-		fprintf(pFile, "};\n");
 
-		fprintf(pFile, "float sh_grn[9] = {");
-		{
-			for (int index = 0; index < 9; index++) {
-				fprintf(pFile, "%ff", sh_grn[index]);
-				if (index < 8) fprintf(pFile, ", ");
-			}
+		for (int index = 0; index < 9; index++) {
+			fprintf(pFile, "%f", sh_grn[index]);
+			fprintf(pFile, index < 8 ? " " : "\n");
 		}
-		fprintf(pFile, "};\n");
 
-		fprintf(pFile, "float sh_blu[9] = {");
-		{
-			for (int index = 0; index < 9; index++) {
-				fprintf(pFile, "%ff", sh_blu[index]);
-				if (index < 8) fprintf(pFile, ", ");
-			}
+		for (int index = 0; index < 9; index++) {
+			fprintf(pFile, "%f", sh_blu[index]);
+			fprintf(pFile, index < 8 ? " " : "\n");
 		}
-		fprintf(pFile, "};\n");
 
 		fclose(pFile);
 	}

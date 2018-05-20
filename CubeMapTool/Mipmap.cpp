@@ -142,29 +142,20 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 		for (int mipLevel = 0; mipLevel < mipLevels; mipLevel++) {
 			if (CreateFBO(IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel])) == FALSE) goto ERR;
 			{
-				/*
-				glEnable(GL_TEXTURE_CUBE_MAP);
+				glEnable(GL_TEXTURE_2D);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				glBindTexture(GL_TEXTURE_2D, texture);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 				{
 					glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 					glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 					glm::mat4 matModeViewProjection = matProjection * matModeView;
-					glm::mat4 matTexcoords[6] = {
-						glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
-						glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
-						glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
-						glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
-						glm::mat4(),
-						glm::rotate(glm::mat4(),  PI, glm::vec3(0.0f, 1.0f, 0.0f)),
-					};
 
-					glViewport(0, 0, CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel]));
+					glViewport(0, 0, IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel]));
 					glUseProgram(program);
 					glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 					glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -178,14 +169,10 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 						glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
 						glUniform1f(uniformLocationRoughness, mipLevel / (mipLevels - 1.0f));
 						glUniform1ui(uniformLocationSamples, samples);
-						glUniform1i(uniformLocationCubemap, 0);
+						glUniform1i(uniformLocationEnvmap, 0);
 
-						for (int index = 0; index < 6; index++)
-						{
-							glUniformMatrix4fv(uniformLocationTexcoordMatrix, 1, GL_FALSE, (const float *)&matTexcoords[index]);
-							glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-							glReadPixels(0, 0, CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel]), GL_BGR, GL_UNSIGNED_BYTE, pMipmaps[mipLevel].faces[index].data);
-						}
+						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+						glReadPixels(0, 0, IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel]), GL_BGR, GL_UNSIGNED_BYTE, pMipmaps[mipLevel].data);
 					}
 					glDisableVertexAttribArray(attribLocationPosition);
 					glDisableVertexAttribArray(attribLocationTexcoord);
@@ -195,7 +182,6 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 					glUseProgram(0);
 				}
 				glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-				*/
 			}
 			DestroyFBO();
 		}

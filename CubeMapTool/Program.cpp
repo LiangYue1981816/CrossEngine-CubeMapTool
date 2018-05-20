@@ -12,6 +12,7 @@ GLuint uniformLocationSHGrn = 0;
 GLuint uniformLocationSHBlu = 0;
 GLuint uniformLocationSamples = 0;
 GLuint uniformLocationRoughness = 0;
+GLuint uniformLocationEnvmap = 0;
 GLuint uniformLocationCubemap = 0;
 
 BOOL CreateProgram(const char *szShaderVertexCode, const char *szShaderFragmentCode)
@@ -68,6 +69,7 @@ BOOL CreateProgram(const char *szShaderVertexCode, const char *szShaderFragmentC
 	uniformLocationSHBlu = glGetUniformLocation(program, "_sh_blu");
 	uniformLocationSamples = glGetUniformLocation(program, "_samples");
 	uniformLocationRoughness = glGetUniformLocation(program, "_roughness");
+	uniformLocationEnvmap = glGetUniformLocation(program, "_envmap");
 	uniformLocationCubemap = glGetUniformLocation(program, "_cubemap");
 
 	return TRUE;

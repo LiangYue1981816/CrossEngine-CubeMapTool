@@ -51,7 +51,7 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 			vec2 SphericalSampleing(vec3 v) 														\n\
 			{                                                                                       \n\
 				vec2 invAtan = vec2(1.0 / (2.0 * PI), 1.0 / (1.0 * PI));                            \n\
-				vec2 uv = vec2(atan(v.z, v.x), asin(v.y));                                          \n\
+				vec2 uv = vec2(atan(v.z, v.x), -asin(v.y));                                         \n\
 																									\n\
 				uv *= invAtan;                                                                      \n\
 				uv += 0.5;                                                                          \n\
@@ -126,10 +126,10 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 		";
 
 	static const vertex vertices[4] = {
-		{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 1.0f } },
-		{ {  1.0f, -1.0f, 0.0f },{ 1.0f, 1.0f } },
-		{ {  1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f } },
-		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 0.0f } },
+		{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f } },
+		{ {  1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f } },
+		{ {  1.0f,  1.0f, 0.0f },{ 1.0f, 1.0f } },
+		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f } },
 	};
 	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 

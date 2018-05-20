@@ -1,10 +1,8 @@
 #include "stdafx.h"
 
 
-BOOL GenerateMipmaps(CUBEMAP *pEnvMap, CUBEMAP pMipmaps[], int mipLevels, int samples)
-{
-	static const GLchar *szShaderVertexCode =
-		"                                                                                           \n\
+static const GLchar *szShaderVertexCode =
+"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
 			uniform mat4 _modelViewProjectionMatrix;                                                \n\
@@ -21,8 +19,8 @@ BOOL GenerateMipmaps(CUBEMAP *pEnvMap, CUBEMAP pMipmaps[], int mipLevels, int sa
 			}                                                                                       \n\
 		";
 
-	static const GLchar *szShaderFragmentCode =
-		"                                                                                           \n\
+static const GLchar *szShaderFragmentCode =
+"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
 			#define PI 3.1415926535897932384626433832795f                                           \n\
@@ -101,14 +99,16 @@ BOOL GenerateMipmaps(CUBEMAP *pEnvMap, CUBEMAP pMipmaps[], int mipLevels, int sa
 			}                                                                                       \n\
 		";
 
-	static const vertex vertices[4] = {
-		{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
-		{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
-		{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
-		{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
-	};
-	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
+static const vertex vertices[4] = {
+	{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
+	{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
+	{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
+	{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
+};
+static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
+BOOL GenerateMipmaps(CUBEMAP *pEnvMap, CUBEMAP pMipmaps[], int mipLevels, int samples)
+{
 	BOOL rcode = TRUE;
 	GLuint texture = CreateTextureCube(pEnvMap);
 

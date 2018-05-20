@@ -140,11 +140,11 @@ void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
 	}
 }
 
-void GenerateIrradianceCubeMapSH(CUBEMAP *pEnvMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
-		unsigned int color = CubeMapGetPixelColor(pEnvMap, direction);
+		unsigned int color = CubeMapGetPixelColor(pCubeMap, direction);
 		SH(sh_red, sh_grn, sh_blu, color, direction);
 	}
 
@@ -155,7 +155,7 @@ void GenerateIrradianceCubeMapSH(CUBEMAP *pEnvMap, float *sh_red, float *sh_grn,
 	}
 }
 
-BOOL GenerateIrradianceCubeMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
+BOOL GenerateIrradianceCubeMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -245,7 +245,7 @@ BOOL GenerateIrradianceCubeMap(CUBEMAP *pEnvMap, CUBEMAP *pIrrMap, int samples)
 		float sh_red[9] = { 0.0f };
 		float sh_grn[9] = { 0.0f };
 		float sh_blu[9] = { 0.0f };
-		GenerateIrradianceCubeMapSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
+		GenerateIrradianceCubeMapSH(pCubeMap, sh_red, sh_grn, sh_blu, samples);
 		SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
 
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));

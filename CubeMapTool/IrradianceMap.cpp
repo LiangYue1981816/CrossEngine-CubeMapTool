@@ -116,7 +116,7 @@ static glm::vec3 Sampling(glm::vec2 xi)
 
 static glm::vec2 SampleSphericalMap(glm::vec3 v)
 {
-	glm::vec2 invAtan = glm::vec2(0.1591f, 0.3183f);
+	glm::vec2 invAtan = glm::vec2(1.0f / (2.0f * PI), 1.0f / (1.0f * PI));
 	glm::vec2 uv = glm::vec2(atan2f(v.z, v.x), asinf(v.y));
 	uv *= invAtan;
 	uv += 0.5f;

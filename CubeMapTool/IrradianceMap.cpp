@@ -256,7 +256,6 @@ static BOOL RenderIrradianceMap(CUBEMAP *pIrrMap, float *sh_red, float *sh_grn, 
 		{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
 		{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
 	};
-
 	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
 	BOOL rcode = TRUE;

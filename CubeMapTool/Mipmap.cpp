@@ -65,9 +65,9 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 				uv -= 0.5;                                                                          \n\
 				uv *= invAtan;                                                                      \n\
 																									\n\
-				float x = sin(uv.x); 																\n\
+				float x = cos(uv.x); 																\n\
 				float y = sin(uv.y); 																\n\
-				float z = cos(uv.x); 																\n\
+				float z = sin(uv.x); 																\n\
 				float a = sqrt((1.0 - y * y) / (x * x + z * z)); 									\n\
 																									\n\
 				return vec3(x * a, y, z * a);                                                       \n\
@@ -126,10 +126,10 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 		";
 
 	static const vertex vertices[4] = {
-		{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f } },
-		{ {  1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f } },
-		{ {  1.0f,  1.0f, 0.0f },{ 1.0f, 1.0f } },
-		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f } },
+		{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 1.0f } },
+		{ {  1.0f, -1.0f, 0.0f },{ 1.0f, 1.0f } },
+		{ {  1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f } },
+		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 0.0f } },
 	};
 	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 

@@ -118,46 +118,7 @@ glm::vec3 Sampling(glm::vec2 xi)
 
 #pragma region IrradianceMap
 
-void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
-{
-	if (FILE *pFile = fopen(szFileName, "wb")) {
-		for (int index = 0; index < 9; index++) {
-			fprintf(pFile, "%f", sh_red[index]);
-			fprintf(pFile, index < 8 ? " " : "\n");
-		}
-
-		for (int index = 0; index < 9; index++) {
-			fprintf(pFile, "%f", sh_grn[index]);
-			fprintf(pFile, index < 8 ? " " : "\n");
-		}
-
-		for (int index = 0; index < 9; index++) {
-			fprintf(pFile, "%f", sh_blu[index]);
-			fprintf(pFile, index < 8 ? " " : "\n");
-		}
-
-		fclose(pFile);
-	}
-}
-
-void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
-{
-	for (int index = 0; index < samples; index++) {
-		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
-		unsigned int color = CubeMapGetPixelColor(pCubeMap, direction);
-		SH(sh_red, sh_grn, sh_blu, color, direction);
-	}
-
-	for (int index = 0; index < 9; index++) {
-		sh_red[index] *= a[index] * factors[index] * PI * 4.0f / samples;
-		sh_grn[index] *= a[index] * factors[index] * PI * 4.0f / samples;
-		sh_blu[index] *= a[index] * factors[index] * PI * 4.0f / samples;
-	}
-}
-
-BOOL GenerateIrradianceCubeMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
-{
-	static const GLchar *szShaderVertexCode =
+static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
@@ -175,7 +136,7 @@ BOOL GenerateIrradianceCubeMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 			}                                                                                       \n\
 		";
 
-	static const GLchar *szShaderFragmentCode =
+static const GLchar *szShaderFragmentCode =
 		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
@@ -228,13 +189,52 @@ BOOL GenerateIrradianceCubeMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 			}                                                                                       \n\
 		";
 
-	static const vertex vertices[4] = {
+void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
+{
+	if (FILE *pFile = fopen(szFileName, "wb")) {
+		for (int index = 0; index < 9; index++) {
+			fprintf(pFile, "%f", sh_red[index]);
+			fprintf(pFile, index < 8 ? " " : "\n");
+		}
+
+		for (int index = 0; index < 9; index++) {
+			fprintf(pFile, "%f", sh_grn[index]);
+			fprintf(pFile, index < 8 ? " " : "\n");
+		}
+
+		for (int index = 0; index < 9; index++) {
+			fprintf(pFile, "%f", sh_blu[index]);
+			fprintf(pFile, index < 8 ? " " : "\n");
+		}
+
+		fclose(pFile);
+	}
+}
+
+void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+{
+	for (int index = 0; index < samples; index++) {
+		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
+		unsigned int color = CubeMapGetPixelColor(pCubeMap, direction);
+		SH(sh_red, sh_grn, sh_blu, color, direction);
+	}
+
+	for (int index = 0; index < 9; index++) {
+		sh_red[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_grn[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_blu[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+	}
+}
+
+BOOL GenerateIrradianceCubeMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
+{
+	const vertex vertices[4] = {
 		{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
 		{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
 		{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
 		{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
 	};
-	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
+	const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
 	BOOL rcode = TRUE;
 

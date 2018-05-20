@@ -50,6 +50,31 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 				return vec2(1.0f * i / n, RadicalInverse(i));                                       \n\
 			}                                                                                       \n\
 																									\n\
+			vec2 SphericalSampleing(vec3 v) 														\n\
+			{                                                                                       \n\
+				vec2 invAtan = vec2(1.0 / (2.0 * PI), 1.0 / (1.0 * PI));                            \n\
+				vec2 uv = vec2(atan2(v.x, v.z), asin(v.y));                                         \n\
+																									\n\
+				uv *= invAtan;                                                                      \n\
+				uv += 0.5;                                                                          \n\
+																									\n\
+				return uv;                                                                          \n\
+			}                                                                                       \n\
+																									\n\
+			glm::vec3 SphericalToDirection(vec2 uv)													\n\
+			{                                                                                       \n\
+				vec2 invAtan = vec2(2.0 * PI, 1.0 * PI);                                            \n\
+				uv -= 0.5;                                                                          \n\
+				uv *= invAtan;                                                                      \n\
+																									\n\
+				float x = sin(uv.x); 																\n\
+				float y = sin(uv.y); 																\n\
+				float z = cos(uv.x); 																\n\
+				float a = sqrt((1.0 - y * y) / (x * x + z * z)); 									\n\
+																									\n\
+				return vec3(x * a, y, z * a);                                                       \n\
+			}                                                                                       \n\
+																									\n\
 			vec3 ImportanceSamplingGGX(vec2 xi, vec3 normal, float roughness)                       \n\
 			{                                                                                       \n\
 				float a = roughness * roughness;                                                    \n\

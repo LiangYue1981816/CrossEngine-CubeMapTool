@@ -27,7 +27,7 @@ static const GLchar *szShaderFragmentCode =
 																									\n\
 			uniform uint _samples;                                                                  \n\
 			uniform float _roughness;                                                               \n\
-			uniform samplerCube _envmap;                                                            \n\
+			uniform samplerCube _cubemap;                                                           \n\
 																									\n\
 			uniform mat4 _texcoordMatrix;                                                           \n\
 																									\n\
@@ -64,7 +64,7 @@ static const GLchar *szShaderFragmentCode =
 				return normalize(tx * h.x + ty * h.y + normal * h.z);                               \n\
 			}                                                                                       \n\
 																									\n\
-			vec3 Sampling(samplerCube envmap, vec3 normal, float roughness, uint samples)           \n\
+			vec3 Sampling(samplerCube cubemap, vec3 normal, float roughness, uint samples)          \n\
 			{                                                                                       \n\
 				vec3 N = normal;                                                                    \n\
 				vec3 V = normal;                                                                    \n\
@@ -81,7 +81,7 @@ static const GLchar *szShaderFragmentCode =
 					float ndotl = max(dot(N, L), 0.0f);                                             \n\
 																									\n\
 					if (ndotl > 0.0f) {                                                             \n\
-						color += pow(texture(envmap, L).rgb, vec3(1.0f / 2.2f)) * ndotl;            \n\
+						color += pow(texture(cubemap, L).rgb, vec3(1.0f / 2.2f)) * ndotl;           \n\
 						weight += ndotl;                                                            \n\
 					}                                                                               \n\
 				}                                                                                   \n\
@@ -94,7 +94,7 @@ static const GLchar *szShaderFragmentCode =
 			{                                                                                       \n\
 				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
 				direction.xyz = normalize(direction.xyz);                                           \n\
-				gl_FragColor.rgb = Sampling(_envmap, direction.xyz, _roughness, _samples);          \n\
+				gl_FragColor.rgb = Sampling(_cubemap, direction.xyz, _roughness, _samples);         \n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
 		";
@@ -153,7 +153,7 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 						glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
 						glUniform1f(uniformLocationRoughness, mipLevel / (mipLevels - 1.0f));
 						glUniform1ui(uniformLocationSamples, samples);
-						glUniform1i(uniformLocationEnvmap, 0);
+						glUniform1i(uniformLocationCubemap, 0);
 
 						for (int index = 0; index < 6; index++)
 						{

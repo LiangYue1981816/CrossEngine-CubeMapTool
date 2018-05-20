@@ -107,10 +107,10 @@ static const vertex vertices[4] = {
 };
 static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
-BOOL GenerateMipmaps(CUBEMAP *pEnvMap, CUBEMAP pMipmaps[], int mipLevels, int samples)
+BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, int samples)
 {
 	BOOL rcode = TRUE;
-	GLuint texture = CreateTextureCube(pEnvMap);
+	GLuint texture = CreateTextureCube(pCubeMap);
 
 	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;

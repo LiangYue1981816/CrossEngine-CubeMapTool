@@ -29,9 +29,7 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 																									\n\
 			uniform uint _samples;                                                                  \n\
 			uniform float _roughness;                                                               \n\
-			uniform samplerCube _cubemap;                                                           \n\
-																									\n\
-			uniform mat4 _texcoordMatrix;                                                           \n\
+			uniform sampler2D _envmap;                                                              \n\
 																									\n\
 			varying vec4 texcoord;                                                                  \n\
 																									\n\
@@ -91,7 +89,7 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 				return normalize(tx * h.x + ty * h.y + normal * h.z);                               \n\
 			}                                                                                       \n\
 																									\n\
-			vec3 Sampling(samplerCube cubemap, vec3 normal, float roughness, uint samples)          \n\
+			vec3 Sampling(sampler2D envmap, vec3 normal, float roughness, uint samples)             \n\
 			{                                                                                       \n\
 				vec3 N = normal;                                                                    \n\
 				vec3 V = normal;                                                                    \n\
@@ -104,11 +102,12 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 					vec2 Xi = Hammersley(index, samples);                                           \n\
 					vec3 H = ImportanceSamplingGGX(Xi, N, roughness);                               \n\
 					vec3 L = normalize(dot(V, H) * H * 2.0f - V);                                   \n\
+					vec2 uv = SphericalSampleing(L);                                                \n\
 																									\n\
 					float ndotl = max(dot(N, L), 0.0f);                                             \n\
 																									\n\
 					if (ndotl > 0.0f) {                                                             \n\
-						color += pow(texture(cubemap, L).rgb, vec3(1.0f / 2.2f)) * ndotl;           \n\
+						color += pow(texture(envmap, uv).rgb, vec3(1.0f / 2.2f)) * ndotl;           \n\
 						weight += ndotl;                                                            \n\
 					}                                                                               \n\
 				}                                                                                   \n\
@@ -119,9 +118,9 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 																									\n\
 			void main()                                                                             \n\
 			{                                                                                       \n\
-				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
+				vec4 direction = SphericalToDirection(texcoord.xy);                                 \n\
 				direction.xyz = normalize(direction.xyz);                                           \n\
-				gl_FragColor.rgb = Sampling(_cubemap, direction.xyz, _roughness, _samples);         \n\
+				gl_FragColor.rgb = Sampling(_envmap, direction.xyz, _roughness, _samples);          \n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
 		";

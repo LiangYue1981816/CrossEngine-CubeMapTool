@@ -2,7 +2,7 @@
 
 
 static const GLchar *szShaderVertexCode =
-"                                                                                           \n\
+		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
 			uniform mat4 _modelViewProjectionMatrix;                                                \n\
@@ -20,7 +20,7 @@ static const GLchar *szShaderVertexCode =
 		";
 
 static const GLchar *szShaderFragmentCode =
-"                                                                                           \n\
+		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
 			#define PI 3.1415926535897932384626433832795f                                           \n\

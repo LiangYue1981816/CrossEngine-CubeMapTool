@@ -261,7 +261,7 @@ static void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float 
 	}
 }
 
-BOOL GenerateIrradianceEnvMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
+BOOL GenerateEnvIrradianceMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
 {
 	BOOL rcode = TRUE;
 
@@ -329,7 +329,7 @@ RET:
 	return rcode;
 }
 
-BOOL GenerateIrradianceCubeMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
+BOOL GenerateCubeIrradianceMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 {
 	BOOL rcode = TRUE;
 

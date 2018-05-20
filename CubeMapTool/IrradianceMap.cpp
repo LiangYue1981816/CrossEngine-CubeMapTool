@@ -2,7 +2,6 @@
 
 
 #pragma region SH
-
 // https://cseweb.ucsd.edu/~ravir/papers/invlamb/josa.pdf
 // http://cseweb.ucsd.edu/~ravir/papers/envmap/envmap.pdf
 
@@ -81,11 +80,9 @@ static void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int colo
 		sh_blu[index] += basis[index] * b;
 	}
 }
-
 #pragma endregion
 
 #pragma region Sampling
-
 static float RadicalInverse(unsigned int bits)
 {
 	bits = (bits << 16u) | (bits >> 16u);
@@ -122,93 +119,10 @@ static glm::vec2 SphericalSampleing(glm::vec3 v)
 	uv += 0.5f;
 	return uv;
 }
-
-
 #pragma endregion
 
 #pragma region IrradianceMap
-
-static const vertex vertices[4] = {
-	{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
-	{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
-	{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
-	{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
-};
-
-static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
-
-static const GLchar *szShaderVertexCode =
-		"                                                                                           \n\
-			#version 330                                                                            \n\
-																									\n\
-			uniform mat4 _modelViewProjectionMatrix;                                                \n\
-																									\n\
-			attribute vec3 _position;                                                               \n\
-			attribute vec4 _texcoord;                                                               \n\
-																									\n\
-			varying vec4 texcoord;                                                                  \n\
-																									\n\
-			void main()                                                                             \n\
-			{                                                                                       \n\
-				gl_Position = _modelViewProjectionMatrix*vec4(_position, 1.0);                      \n\
-				texcoord = _texcoord;                                                               \n\
-			}                                                                                       \n\
-		";
-
-static const GLchar *szShaderFragmentCode =
-		"                                                                                           \n\
-			#version 330                                                                            \n\
-																									\n\
-			uniform float _sh_red[9];                                                               \n\
-			uniform float _sh_grn[9];                                                               \n\
-			uniform float _sh_blu[9];                                                               \n\
-																									\n\
-			uniform mat4 _texcoordMatrix;                                                           \n\
-																									\n\
-			varying vec4 texcoord;                                                                  \n\
-																									\n\
-			vec3 SH(vec3 direction)                                                                 \n\
-			{                                                                                       \n\
-				float basis[9];                                                                     \n\
-																									\n\
-				float x = direction.x;                                                              \n\
-				float y = direction.y;                                                              \n\
-				float z = direction.z;                                                              \n\
-																									\n\
-				vec3 color = vec3(0.0f, 0.0f, 0.0f);                                                \n\
-																									\n\
-				basis[0] = 1.0f;                                                                    \n\
-																									\n\
-				basis[1] = z;                                                                       \n\
-				basis[2] = x;                                                                       \n\
-				basis[3] = y;                                                                       \n\
-																									\n\
-				basis[4] = (z * z * 2.0f - x * x - y * y);                                          \n\
-				basis[5] = (z * x);                                                                 \n\
-				basis[6] = (y * z);                                                                 \n\
-				basis[7] = (x * x - y * y);                                                         \n\
-				basis[8] = (x * y);                                                                 \n\
-																									\n\
-				for (int index = 0; index < 9; index++)                                             \n\
-				{                                                                                   \n\
-					color.r += _sh_red[index] * basis[index];                                       \n\
-					color.g += _sh_grn[index] * basis[index];                                       \n\
-					color.b += _sh_blu[index] * basis[index];                                       \n\
-				}                                                                                   \n\
-																									\n\
-				return color;                                                                       \n\
-			}                                                                                       \n\
-																									\n\
-			void main()                                                                             \n\
-			{                                                                                       \n\
-				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
-				direction.xyz = normalize(direction.xyz);                                           \n\
-				gl_FragColor.rgb = SH(direction.xyz);                                               \n\
-				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
-			}                                                                                       \n\
-		";
-
-void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
+static void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	if (FILE *pFile = fopen(szFileName, "wb")) {
 		for (int index = 0; index < 9; index++) {
@@ -261,20 +175,94 @@ static void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float 
 	}
 }
 
-BOOL GenerateEnvIrradianceMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
+static BOOL RenderIrradianceMap(CUBEMAP *pIrrMap, float *sh_red, float *sh_grn, float *sh_blu)
 {
+	static const GLchar *szShaderVertexCode =
+		"                                                                                           \n\
+			#version 330                                                                            \n\
+																									\n\
+			uniform mat4 _modelViewProjectionMatrix;                                                \n\
+																									\n\
+			attribute vec3 _position;                                                               \n\
+			attribute vec4 _texcoord;                                                               \n\
+																									\n\
+			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			void main()                                                                             \n\
+			{                                                                                       \n\
+				gl_Position = _modelViewProjectionMatrix*vec4(_position, 1.0);                      \n\
+				texcoord = _texcoord;                                                               \n\
+			}                                                                                       \n\
+		";
+
+	static const GLchar *szShaderFragmentCode =
+		"                                                                                           \n\
+			#version 330                                                                            \n\
+																									\n\
+			uniform float _sh_red[9];                                                               \n\
+			uniform float _sh_grn[9];                                                               \n\
+			uniform float _sh_blu[9];                                                               \n\
+																									\n\
+			uniform mat4 _texcoordMatrix;                                                           \n\
+																									\n\
+			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			vec3 SH(vec3 direction)                                                                 \n\
+			{                                                                                       \n\
+				float basis[9];                                                                     \n\
+																									\n\
+				float x = direction.x;                                                              \n\
+				float y = direction.y;                                                              \n\
+				float z = direction.z;                                                              \n\
+																									\n\
+				vec3 color = vec3(0.0f, 0.0f, 0.0f);                                                \n\
+																									\n\
+				basis[0] = 1.0f;                                                                    \n\
+																									\n\
+				basis[1] = z;                                                                       \n\
+				basis[2] = x;                                                                       \n\
+				basis[3] = y;                                                                       \n\
+																									\n\
+				basis[4] = (z * z * 2.0f - x * x - y * y);                                          \n\
+				basis[5] = (z * x);                                                                 \n\
+				basis[6] = (y * z);                                                                 \n\
+				basis[7] = (x * x - y * y);                                                         \n\
+				basis[8] = (x * y);                                                                 \n\
+																									\n\
+				for (int index = 0; index < 9; index++)                                             \n\
+				{                                                                                   \n\
+					color.r += _sh_red[index] * basis[index];                                       \n\
+					color.g += _sh_grn[index] * basis[index];                                       \n\
+					color.b += _sh_blu[index] * basis[index];                                       \n\
+				}                                                                                   \n\
+																									\n\
+				return color;                                                                       \n\
+			}                                                                                       \n\
+																									\n\
+			void main()                                                                             \n\
+			{                                                                                       \n\
+				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
+				direction.xyz = normalize(direction.xyz);                                           \n\
+				gl_FragColor.rgb = SH(direction.xyz);                                               \n\
+				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
+			}                                                                                       \n\
+		";
+
+	static const vertex vertices[4] = {
+		{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
+		{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
+		{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
+		{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
+	};
+
+	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
+
 	BOOL rcode = TRUE;
 
 	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (CreateFBO(CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap)) == FALSE) goto ERR;
 	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
-		float sh_red[9] = { 0.0f };
-		float sh_grn[9] = { 0.0f };
-		float sh_blu[9] = { 0.0f };
-		GenerateIrradianceEnvMapSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
-		SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
-
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 		glm::mat4 matModeViewProjection = matProjection * matModeView;
@@ -325,76 +313,33 @@ RET:
 	DestroyVBO();
 	DestroyFBO();
 	DestroyProgram();
-
 	return rcode;
+}
+
+BOOL GenerateEnvIrradianceMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
+{
+	float sh_red[9] = { 0.0f };
+	float sh_grn[9] = { 0.0f };
+	float sh_blu[9] = { 0.0f };
+
+	GenerateIrradianceEnvMapSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
+	RenderIrradianceMap(pIrrMap, sh_red, sh_grn, sh_blu);
+	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
+
+	return TRUE;
 }
 
 BOOL GenerateCubeIrradianceMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 {
-	BOOL rcode = TRUE;
+	float sh_red[9] = { 0.0f };
+	float sh_grn[9] = { 0.0f };
+	float sh_blu[9] = { 0.0f };
 
-	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
-	if (CreateFBO(CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap)) == FALSE) goto ERR;
-	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
-	{
-		float sh_red[9] = { 0.0f };
-		float sh_grn[9] = { 0.0f };
-		float sh_blu[9] = { 0.0f };
-		GenerateIrradianceCubeMapSH(pCubeMap, sh_red, sh_grn, sh_blu, samples);
-		SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
+	GenerateIrradianceCubeMapSH(pCubeMap, sh_red, sh_grn, sh_blu, samples);
+	RenderIrradianceMap(pIrrMap, sh_red, sh_grn, sh_blu);
+	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
 
-		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-		glm::mat4 matModeViewProjection = matProjection * matModeView;
-		glm::mat4 matTexcoords[6] = {
-			glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
-			glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
-			glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
-			glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
-			glm::mat4(),
-			glm::rotate(glm::mat4(),  PI, glm::vec3(0.0f, 1.0f, 0.0f)),
-		};
-
-		glViewport(0, 0, CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap));
-		glUseProgram(program);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glEnableVertexAttribArray(attribLocationPosition);
-		glEnableVertexAttribArray(attribLocationTexcoord);
-		{
-			glVertexAttribPointer(attribLocationPosition, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)0);
-			glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
-
-			glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
-			glUniform1fv(uniformLocationSHRed, 9, sh_red);
-			glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
-			glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
-
-			for (int index = 0; index < 6; index++)
-			{
-				glUniformMatrix4fv(uniformLocationTexcoordMatrix, 1, GL_FALSE, (const float *)&matTexcoords[index]);
-				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-				glReadPixels(0, 0, CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap), GL_BGR, GL_UNSIGNED_BYTE, pIrrMap->faces[index].data);
-			}
-		}
-		glDisableVertexAttribArray(attribLocationPosition);
-		glDisableVertexAttribArray(attribLocationTexcoord);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glUseProgram(0);
-	}
-
-	goto RET;
-ERR:
-	rcode = FALSE;
-RET:
-	DestroyVBO();
-	DestroyFBO();
-	DestroyProgram();
-
-	return rcode;
+	return TRUE;
 }
 
 #pragma endregion

@@ -40,7 +40,7 @@ static const float factors[9] = {
 	0.54627421529603953527169285290134f
 };
 
-void SHBasis(float basis[], glm::vec3 direction)
+static void SHBasis(float basis[], glm::vec3 direction)
 {
 	// https://zh.wikipedia.org/wiki/%E7%90%83%E8%B0%90%E5%87%BD%E6%95%B0
 
@@ -61,7 +61,7 @@ void SHBasis(float basis[], glm::vec3 direction)
 	basis[8] = factors[8] * (x * y);
 }
 
-void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int color, glm::vec3 direction)
+static void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int color, glm::vec3 direction)
 {
 	float basis[9] = { 0.0f };
 
@@ -86,7 +86,7 @@ void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int color, glm:
 
 #pragma region Sampling
 
-float RadicalInverse(unsigned int bits)
+static float RadicalInverse(unsigned int bits)
 {
 	bits = (bits << 16u) | (bits >> 16u);
 	bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
@@ -96,12 +96,12 @@ float RadicalInverse(unsigned int bits)
 	return float(bits) * 2.3283064365386963e-10f;
 }
 
-glm::vec2 Hammersley(unsigned int i, unsigned int n)
+static glm::vec2 Hammersley(unsigned int i, unsigned int n)
 {
 	return glm::vec2(1.0f * i / n, RadicalInverse(i));
 }
 
-glm::vec3 Sampling(glm::vec2 xi)
+static glm::vec3 Sampling(glm::vec2 xi)
 {
 	float phi = 2.0f * PI * xi.x;
 	float theta = 2.0f * acos(sqrt(1.0f - xi.y));
@@ -114,9 +114,28 @@ glm::vec3 Sampling(glm::vec2 xi)
 	return glm::vec3(sintheta * cosphi, sintheta * sinphi, costheta);
 }
 
+static glm::vec2 SampleSphericalMap(glm::vec3 v)
+{
+	glm::vec2 invAtan = glm::vec2(0.1591f, 0.3183f);
+	glm::vec2 uv = glm::vec2(atan2f(v.z, v.x), asinf(v.y));
+	uv *= invAtan;
+	uv += 0.5f;
+	return uv;
+}
+
+
 #pragma endregion
 
 #pragma region IrradianceMap
+
+static const vertex vertices[4] = {
+	{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
+	{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
+	{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
+	{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
+};
+
+static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
 static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -211,7 +230,23 @@ void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *sh_blu)
 	}
 }
 
-void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+static void GenerateIrradianceEnvMapSH(IMAGE *pEnvMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+{
+	for (int index = 0; index < samples; index++) {
+		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
+		glm::vec2 uv = SampleSphericalMap(direction);
+		unsigned int color = IMAGE_GetPixelColor(pEnvMap, (int)(uv.x * IMAGE_WIDTH(pEnvMap) + 0.5f) - 1, (int)(uv.y * IMAGE_HEIGHT(pEnvMap) + 0.5f) - 1);
+		SH(sh_red, sh_grn, sh_blu, color, direction);
+	}
+
+	for (int index = 0; index < 9; index++) {
+		sh_red[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_grn[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_blu[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+	}
+}
+
+static void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
@@ -226,16 +261,76 @@ void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float *sh_grn
 	}
 }
 
+BOOL GenerateIrradianceEnvMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
+{
+	BOOL rcode = TRUE;
+
+	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
+	if (CreateFBO(CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap)) == FALSE) goto ERR;
+	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
+	{
+		float sh_red[9] = { 0.0f };
+		float sh_grn[9] = { 0.0f };
+		float sh_blu[9] = { 0.0f };
+		GenerateIrradianceEnvMapSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
+		SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
+
+		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		glm::mat4 matModeViewProjection = matProjection * matModeView;
+		glm::mat4 matTexcoords[6] = {
+			glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
+			glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
+			glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
+			glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
+			glm::mat4(),
+			glm::rotate(glm::mat4(),  PI, glm::vec3(0.0f, 1.0f, 0.0f)),
+		};
+
+		glViewport(0, 0, CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap));
+		glUseProgram(program);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glEnableVertexAttribArray(attribLocationPosition);
+		glEnableVertexAttribArray(attribLocationTexcoord);
+		{
+			glVertexAttribPointer(attribLocationPosition, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)0);
+			glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
+
+			glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
+			glUniform1fv(uniformLocationSHRed, 9, sh_red);
+			glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
+			glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
+
+			for (int index = 0; index < 6; index++)
+			{
+				glUniformMatrix4fv(uniformLocationTexcoordMatrix, 1, GL_FALSE, (const float *)&matTexcoords[index]);
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+				glReadPixels(0, 0, CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap), GL_BGR, GL_UNSIGNED_BYTE, pIrrMap->faces[index].data);
+			}
+		}
+		glDisableVertexAttribArray(attribLocationPosition);
+		glDisableVertexAttribArray(attribLocationTexcoord);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glUseProgram(0);
+	}
+
+	goto RET;
+ERR:
+	rcode = FALSE;
+RET:
+	DestroyVBO();
+	DestroyFBO();
+	DestroyProgram();
+
+	return rcode;
+}
+
 BOOL GenerateIrradianceCubeMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 {
-	const vertex vertices[4] = {
-		{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
-		{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
-		{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
-		{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
-	};
-	const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
-
 	BOOL rcode = TRUE;
 
 	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;

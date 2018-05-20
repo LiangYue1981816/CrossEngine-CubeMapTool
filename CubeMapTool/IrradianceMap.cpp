@@ -114,7 +114,7 @@ static glm::vec3 Sampling(glm::vec2 xi)
 	return glm::vec3(sintheta * cosphi, sintheta * sinphi, costheta);
 }
 
-static glm::vec2 SampleSphericalMap(glm::vec3 v)
+static glm::vec2 SphericalSampleing(glm::vec3 v)
 {
 	glm::vec2 invAtan = glm::vec2(1.0f / (2.0f * PI), 1.0f / (1.0f * PI));
 	glm::vec2 uv = glm::vec2(atan2f(v.x, v.z), asinf(v.y));
@@ -234,7 +234,7 @@ static void GenerateIrradianceEnvMapSH(IMAGE *pEnvMap, float *sh_red, float *sh_
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
-		glm::vec2 uv = SampleSphericalMap(direction);
+		glm::vec2 uv = SphericalSampleing(direction);
 		unsigned int color = IMAGE_GetPixelColor(pEnvMap, (int)(uv.x * (IMAGE_WIDTH(pEnvMap) - 1) + 0.5f), (int)((1.0f - uv.y) * (IMAGE_HEIGHT(pEnvMap) - 1) + 0.5f));
 		SH(sh_red, sh_grn, sh_blu, color, direction);
 	}

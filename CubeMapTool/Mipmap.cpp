@@ -51,7 +51,7 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 			vec2 SphericalSampleing(vec3 v) 														\n\
 			{                                                                                       \n\
 				vec2 invAtan = vec2(1.0 / (2.0 * PI), 1.0 / (1.0 * PI));                            \n\
-				vec2 uv = vec2(atan(v.z, v.x), -asin(v.y));                                         \n\
+				vec2 uv = vec2(atan(v.x, v.z), -asin(v.y));                                         \n\
 																									\n\
 				uv *= invAtan;                                                                      \n\
 				uv += 0.5;                                                                          \n\
@@ -65,9 +65,9 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 				uv -= 0.5;                                                                          \n\
 				uv *= invAtan;                                                                      \n\
 																									\n\
-				float x = cos(uv.x); 																\n\
+				float x = sin(uv.x); 																\n\
 				float y = sin(uv.y); 																\n\
-				float z = sin(uv.x); 																\n\
+				float z = cos(uv.x); 																\n\
 				float a = sqrt((1.0 - y * y) / (x * x + z * z)); 									\n\
 																									\n\
 				return vec3(x * a, y, z * a);                                                       \n\

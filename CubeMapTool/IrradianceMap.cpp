@@ -235,7 +235,7 @@ static void GenerateIrradianceEnvMapSH(IMAGE *pEnvMap, float *sh_red, float *sh_
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
 		glm::vec2 uv = SampleSphericalMap(direction);
-		unsigned int color = IMAGE_GetPixelColor(pEnvMap, (int)(uv.x * IMAGE_WIDTH(pEnvMap) + 0.5f) - 1, (int)(uv.y * IMAGE_HEIGHT(pEnvMap) + 0.5f) - 1);
+		unsigned int color = IMAGE_GetPixelColor(pEnvMap, (int)(uv.x * (IMAGE_WIDTH(pEnvMap) - 1) + 0.5f), (int)((1.0f - uv.y) * (IMAGE_HEIGHT(pEnvMap) - 1) + 0.5f));
 		SH(sh_red, sh_grn, sh_blu, color, direction);
 	}
 

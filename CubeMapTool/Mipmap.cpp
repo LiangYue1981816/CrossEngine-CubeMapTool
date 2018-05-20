@@ -1,7 +1,9 @@
 #include "stdafx.h"
 
 
-static const GLchar *szShaderVertexCode =
+BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, int samples)
+{
+	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
@@ -19,7 +21,7 @@ static const GLchar *szShaderVertexCode =
 			}                                                                                       \n\
 		";
 
-static const GLchar *szShaderFragmentCode =
+	static const GLchar *szShaderFragmentCode =
 		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
@@ -99,16 +101,14 @@ static const GLchar *szShaderFragmentCode =
 			}                                                                                       \n\
 		";
 
-static const vertex vertices[4] = {
-	{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
-	{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
-	{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
-	{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
-};
-static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
+	static const vertex vertices[4] = {
+		{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
+		{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
+		{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
+		{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
+	};
+	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
-BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, int samples)
-{
 	BOOL rcode = TRUE;
 	GLuint texture = CreateTextureCube(pCubeMap);
 

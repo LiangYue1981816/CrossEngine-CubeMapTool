@@ -99,6 +99,7 @@
     <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="FBO.cpp" />
     <ClCompile Include="IrradianceMap.cpp" />
+    <ClCompile Include="lodepng\lodepng.cpp" />
     <ClCompile Include="LUT.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mipmap.cpp" />

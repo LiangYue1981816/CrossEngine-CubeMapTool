@@ -1,6 +1,25 @@
 #include "stdafx.h"
 
 
+template <typename texture_type>
+texture_type LoadTexture(const char *szFileName)
+{
+	texture_type texture = (texture_type)gli::load(szFileName);
+	if (texture.empty()) return texture_type();
+	if (gli::is_compressed(texture.format())) return texture_type();
+	return gli::convert<texture_type>(texture, gli::FORMAT_RGBA32_SFLOAT_PACK32);
+}
+
+glm::f32vec4 GetTexturePixelColor(const gli::texture2d &texture, int x, int y)
+{
+	return texture.load<glm::f32vec4>(gli::texture2d::extent_type(x, y), 0);
+}
+
+glm::f32vec4 GetTexturePixelColor(const gli::texture_cube &texture, int x, int y, int face)
+{
+	return texture.load<glm::f32vec4>(gli::texture_cube::extent_type(x, y), face, 0);
+}
+
 void FlipImage(IMAGE *pImage)
 {
 	for (int y = 0; y < IMAGE_HEIGHT(pImage) / 2; y++) {

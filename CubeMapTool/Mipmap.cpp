@@ -136,11 +136,11 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 	BOOL rcode = TRUE;
 	GLuint texture = CreateTexture2D(pEnvMap);
 
-	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
-	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
+	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
+	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		for (int mipLevel = 0; mipLevel < mipLevels; mipLevel++) {
-			if (CreateFBO(IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel])) == FALSE) goto ERR;
+			if (GLCreateFBO(IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel])) == FALSE) goto ERR;
 			{
 				glEnable(GL_TEXTURE_2D);
 				glActiveTexture(GL_TEXTURE0);
@@ -183,7 +183,7 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 				}
 				glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 			}
-			DestroyFBO();
+			GLDestroyFBO();
 		}
 	}
 
@@ -191,9 +191,9 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 ERR:
 	rcode = FALSE;
 RET:
-	DestroyVBO();
-	DestroyFBO();
-	DestroyProgram();
+	GLDestroyVBO();
+	GLDestroyFBO();
+	GLDestroyProgram();
 	DestroyTexture(texture);
 
 	return rcode;
@@ -310,11 +310,11 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 	BOOL rcode = TRUE;
 	GLuint texture = CreateTextureCube(pCubeMap);
 
-	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
-	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
+	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
+	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		for (int mipLevel = 0; mipLevel < mipLevels; mipLevel++) {
-			if (CreateFBO(CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel])) == FALSE) goto ERR;
+			if (GLCreateFBO(CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel])) == FALSE) goto ERR;
 			{
 				glEnable(GL_TEXTURE_CUBE_MAP);
 				glActiveTexture(GL_TEXTURE0);
@@ -369,7 +369,7 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 				}
 				glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 			}
-			DestroyFBO();
+			GLDestroyFBO();
 		}
 	}
 
@@ -377,9 +377,9 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 ERR:
 	rcode = FALSE;
 RET:
-	DestroyVBO();
-	DestroyFBO();
-	DestroyProgram();
+	GLDestroyVBO();
+	GLDestroyFBO();
+	GLDestroyProgram();
 	DestroyTexture(texture);
 
 	return rcode;

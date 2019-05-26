@@ -126,9 +126,9 @@ BOOL GenerateLUT(IMAGE *pImage, int samples)
 
 	BOOL rcode = TRUE;
 
-	if (CreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
-	if (CreateFBO(IMAGE_WIDTH(pImage), IMAGE_HEIGHT(pImage)) == FALSE) goto ERR;
-	if (CreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
+	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
+	if (GLCreateFBO(IMAGE_WIDTH(pImage), IMAGE_HEIGHT(pImage)) == FALSE) goto ERR;
+	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -163,9 +163,9 @@ BOOL GenerateLUT(IMAGE *pImage, int samples)
 ERR:
 	rcode = FALSE;
 RET:
-	DestroyVBO();
-	DestroyFBO();
-	DestroyProgram();
+	GLDestroyVBO();
+	GLDestroyFBO();
+	GLDestroyProgram();
 
 	return rcode;
 }

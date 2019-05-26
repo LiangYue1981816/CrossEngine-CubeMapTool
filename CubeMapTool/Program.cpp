@@ -15,7 +15,7 @@ GLuint uniformLocationRoughness = 0;
 GLuint uniformLocationEnvmap = 0;
 GLuint uniformLocationCubemap = 0;
 
-BOOL CreateProgram(const char *szShaderVertexCode, const char *szShaderFragmentCode)
+BOOL GLCreateProgram(const char *szShaderVertexCode, const char *szShaderFragmentCode)
 {
 	GLint linked;
 	GLint compiled;
@@ -75,7 +75,7 @@ BOOL CreateProgram(const char *szShaderVertexCode, const char *szShaderFragmentC
 	return TRUE;
 }
 
-void DestroyProgram(void)
+void GLDestroyProgram(void)
 {
 	glUseProgram(0);
 	glDeleteProgram(program);

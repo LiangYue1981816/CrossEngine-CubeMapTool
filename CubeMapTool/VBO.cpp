@@ -4,7 +4,7 @@
 GLuint ibo = 0;
 GLuint vbo = 0;
 
-BOOL CreateVBO(const vertex *vertices, int numVertices, const unsigned short *indices, int numIndices)
+BOOL GLCreateVBO(const vertex *vertices, int numVertices, const unsigned short *indices, int numIndices)
 {
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -19,7 +19,7 @@ BOOL CreateVBO(const vertex *vertices, int numVertices, const unsigned short *in
 	return TRUE;
 }
 
-void DestroyVBO(void)
+void GLDestroyVBO(void)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -146,7 +146,7 @@ gli::texture2d ConvertTextureCubeToTexture2D(const gli::texture_cube &cube)
 	return texture;
 }
 
-GLuint glCreateTexture2D(const gli::texture2d &texture)
+GLuint GLCreateTexture2D(const gli::texture2d &texture)
 {
 	gli::gl GL(gli::gl::PROFILE_ES30);
 	gli::gl::format format = GL.translate(texture.format(), texture.swizzles());
@@ -159,7 +159,7 @@ GLuint glCreateTexture2D(const gli::texture2d &texture)
 	return tex;
 }
 
-GLuint glCreateTextureCube(const gli::texture_cube &texture)
+GLuint GLCreateTextureCube(const gli::texture_cube &texture)
 {
 	gli::gl GL(gli::gl::PROFILE_ES30);
 	gli::gl::format format = GL.translate(texture.format(), texture.swizzles());
@@ -177,9 +177,9 @@ GLuint glCreateTextureCube(const gli::texture_cube &texture)
 	return tex;
 }
 
-void glDestroyTexture(GLuint tex)
+void GLDestroyTexture(GLuint texture)
 {
-	glDeleteTextures(1, &tex);
+	glDeleteTextures(1, &texture);
 }
 
 

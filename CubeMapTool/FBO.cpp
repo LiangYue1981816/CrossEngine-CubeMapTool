@@ -7,7 +7,7 @@ GLuint fboTexture = 0;
 GLuint fboTextureWidth = 0;
 GLuint fboTextureHeight = 0;
 
-BOOL CreateFBO(int width, int height)
+BOOL GLCreateFBO(int width, int height)
 {
 	fboTextureWidth = width;
 	fboTextureHeight = height;
@@ -33,7 +33,7 @@ BOOL CreateFBO(int width, int height)
 	return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE ? TRUE : FALSE;
 }
 
-void DestroyFBO(void)
+void GLDestroyFBO(void)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &fbo);

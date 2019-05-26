@@ -10,6 +10,34 @@ texture_type LoadTexture(const char *szFileName)
 	return gli::convert<texture_type>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
 }
 
+template <typename texture_type>
+void SaveTextureDDS(const char *szFileName, const texture_type &texture)
+{
+	gli::save_dds(texture, szFileName);
+}
+
+template <typename texture_type>
+void SaveTextureKTX(const char *szFileName, const texture_type &texture)
+{
+	gli::save_ktx(texture, szFileName);
+}
+
+template <typename texture_type>
+void SaveTextureKMG(const char *szFileName, const texture_type &texture)
+{
+	gli::save_kmg(texture, szFileName);
+}
+
+void SetTexturePixelColor(gli::texture2d &texture, int x, int y, int level, const glm::f32vec3 &color)
+{
+	texture.store(gli::extent2d(x, y), level, color);
+}
+
+void SetTexturePixelColor(gli::texture_cube &texture, int x, int y, int face, int level, const glm::f32vec3 &color)
+{
+	texture.store(gli::extent2d(x, y), face, level, color);
+}
+
 glm::f32vec3 GetTexturePixelColor(const gli::texture2d &texture, int x, int y)
 {
 	return texture.load<glm::f32vec3>(gli::texture2d::extent_type(x, y), 0);
@@ -20,7 +48,105 @@ glm::f32vec3 GetTexturePixelColor(const gli::texture_cube &texture, int x, int y
 	return texture.load<glm::f32vec3>(gli::texture_cube::extent_type(x, y), face, 0);
 }
 
-GLuint CreateTexture2D(const gli::texture2d &texture)
+glm::f32vec3 GetTexturePixelColor(const gli::texture_cube &texture, const glm::vec3 &direction)
+{
+	/*
+	https://en.wikipedia.org/wiki/Cube_mapping
+
+	major axis
+	direction     target                             sc     tc    ma
+	----------    -------------------------------    ---    ---   ---
+	+rx           TEXTURE_CUBE_MAP_POSITIVE_X_EXT    -rz    -ry   rx
+	-rx           TEXTURE_CUBE_MAP_NEGATIVE_X_EXT    +rz    -ry   rx
+	+ry           TEXTURE_CUBE_MAP_POSITIVE_Y_EXT    +rx    +rz   ry
+	-ry           TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT    +rx    -rz   ry
+	+rz           TEXTURE_CUBE_MAP_POSITIVE_Z_EXT    +rx    -ry   rz
+	-rz           TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT    -rx    -ry   rz
+	*/
+
+	const float rx = direction.x;
+	const float ry = direction.y;
+	const float rz = direction.z;
+	const float arx = fabs(rx);
+	const float ary = fabs(ry);
+	const float arz = fabs(rz);
+
+	int face;
+	int x, y;
+	float sc, tc, ma;
+
+	if (arx >= ary && arx >= arz) {
+		if (rx >= 0.0f) {
+			face = TEXTURE_CUBE_MAP_POSITIVE_X;
+			sc = -rz;
+			tc = -ry;
+			ma = arx;
+		}
+		else {
+			face = TEXTURE_CUBE_MAP_NEGATIVE_X;
+			sc = rz;
+			tc = -ry;
+			ma = arx;
+		}
+	}
+	else if (ary >= arx && ary >= arz) {
+		if (ry >= 0.0f) {
+			face = TEXTURE_CUBE_MAP_POSITIVE_Y;
+			sc = rx;
+			tc = rz;
+			ma = ary;
+		}
+		else {
+			face = TEXTURE_CUBE_MAP_NEGATIVE_Y;
+			sc = rx;
+			tc = -rz;
+			ma = ary;
+		}
+	}
+	else {
+		if (rz >= 0.0f) {
+			face = TEXTURE_CUBE_MAP_POSITIVE_Z;
+			sc = rx;
+			tc = -ry;
+			ma = arz;
+		}
+		else {
+			face = TEXTURE_CUBE_MAP_NEGATIVE_Z;
+			sc = -rx;
+			tc = -ry;
+			ma = arz;
+		}
+	}
+
+	x = (int)(((sc / ma + 1.0f) * 0.5f) * texture.extent().x);
+	y = (int)(((tc / ma + 1.0f) * 0.5f) * texture.extent().y);
+
+	x = max(x, 0);
+	x = min(x, texture.extent().x - 1);
+
+	y = max(y, 0);
+	y = min(y, texture.extent().y - 1);
+
+	return texture.load<glm::f32vec3>(gli::texture_cube::extent_type(x, y), face, 0);
+}
+
+gli::texture2d ConvertTextureCubeToTexture2D(const gli::texture_cube &cube)
+{
+	//     +Y
+	// -X  +Z  +X  -Z
+	//     -Y
+
+	gli::texture2d texture(cube.format(), gli::extent2d(cube.extent().x * 4, cube.extent().y * 3));
+	texture.copy(cube, 0, TEXTURE_CUBE_MAP_POSITIVE_X, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 2, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
+	texture.copy(cube, 0, TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 0, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
+	texture.copy(cube, 0, TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 1, cube.extent().y * 0, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
+	texture.copy(cube, 0, TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 1, cube.extent().y * 2, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
+	texture.copy(cube, 0, TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 1, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
+	texture.copy(cube, 0, TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 3, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
+	return texture;
+}
+
+GLuint glCreateTexture2D(const gli::texture2d &texture)
 {
 	gli::gl GL(gli::gl::PROFILE_ES30);
 	gli::gl::format format = GL.translate(texture.format(), texture.swizzles());
@@ -33,7 +159,7 @@ GLuint CreateTexture2D(const gli::texture2d &texture)
 	return tex;
 }
 
-GLuint CreateTextureCube(const gli::texture_cube &texture)
+GLuint glCreateTextureCube(const gli::texture_cube &texture)
 {
 	gli::gl GL(gli::gl::PROFILE_ES30);
 	gli::gl::format format = GL.translate(texture.format(), texture.swizzles());
@@ -51,7 +177,7 @@ GLuint CreateTextureCube(const gli::texture_cube &texture)
 	return tex;
 }
 
-void DestroyTexture(GLuint tex)
+void glDestroyTexture(GLuint tex)
 {
 	glDeleteTextures(1, &tex);
 }
@@ -106,4 +232,9 @@ GLuint CreateTextureCube(CUBEMAP *pCubeMap)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	return texture;
+}
+
+void DestroyTexture(GLuint texture)
+{
+	glDeleteTextures(1, &texture);
 }

@@ -344,6 +344,7 @@ namespace gli
 		target const& translate(gli::target Target) const;
 
 		/// Convert GLI formats into OpenGL texture formats
+		format translate(gli::format Format) const;
 		format translate(gli::format Format, gli::swizzles const& Swizzle) const;
 
 		/// Convert an OpenGL format into a GLI format

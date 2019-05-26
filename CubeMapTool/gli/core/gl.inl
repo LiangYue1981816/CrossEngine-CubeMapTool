@@ -323,6 +323,19 @@ namespace detail
 		return Table[Target];
 	}
 
+	inline gl::format gl::translate(gli::format Format) const
+	{
+		GLI_ASSERT(Format >= FORMAT_FIRST && Format <= FORMAT_LAST);
+
+		gl::format_desc const& FormatDesc = this->FormatDesc[Format - FORMAT_FIRST];
+
+		gl::format FormatGL;
+		FormatGL.Internal = FormatDesc.Internal;
+		FormatGL.External = FormatDesc.External;
+		FormatGL.Type = FormatDesc.Type;
+		return FormatGL;
+	}
+
 	inline gl::format gl::translate(gli::format Format, gli::swizzles const& Swizzles) const
 	{
 		GLI_ASSERT(Format >= FORMAT_FIRST && Format <= FORMAT_LAST);

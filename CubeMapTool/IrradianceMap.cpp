@@ -173,7 +173,7 @@ static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float 
 	}
 }
 
-static BOOL RenderIrradianceMap(CUBEMAP *pIrrMap, float *sh_red, float *sh_grn, float *sh_blu)
+static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -257,7 +257,7 @@ static BOOL RenderIrradianceMap(CUBEMAP *pIrrMap, float *sh_red, float *sh_grn, 
 	BOOL rcode = TRUE;
 
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
-	if (GLCreateFBO(CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap)) == FALSE) goto ERR;
+	if (GLCreateFBO(texture.extent().x, texture.extent().y) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -272,7 +272,7 @@ static BOOL RenderIrradianceMap(CUBEMAP *pIrrMap, float *sh_red, float *sh_grn, 
 			glm::rotate(glm::mat4(),  PI, glm::vec3(0.0f, 1.0f, 0.0f)),
 		};
 
-		glViewport(0, 0, CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap));
+		glViewport(0, 0, texture.extent().x, texture.extent().y);
 		glUseProgram(program);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -292,7 +292,7 @@ static BOOL RenderIrradianceMap(CUBEMAP *pIrrMap, float *sh_red, float *sh_grn, 
 			{
 				glUniformMatrix4fv(uniformLocationTexcoordMatrix, 1, GL_FALSE, (const float *)&matTexcoords[index]);
 				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-				glReadPixels(0, 0, CUBEMAP_WIDTH(pIrrMap), CUBEMAP_HEIGHT(pIrrMap), GL_BGR, GL_UNSIGNED_BYTE, pIrrMap->faces[index].data);
+				glReadPixels(0, 0, texture.extent().x, texture.extent().y, GL_BGR, GL_UNSIGNED_BYTE, texture.data(0, index, 0));
 			}
 		}
 		glDisableVertexAttribArray(attribLocationPosition);

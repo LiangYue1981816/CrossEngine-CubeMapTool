@@ -140,7 +140,7 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		for (int mipLevel = 0; mipLevel < mipLevels; mipLevel++) {
-			if (GLCreateFBO(IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel])) == FALSE) goto ERR;
+			if (GLCreateFBO(IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel]), gli::FORMAT_UNDEFINED) == FALSE) goto ERR;
 			{
 				glEnable(GL_TEXTURE_2D);
 				glActiveTexture(GL_TEXTURE0);
@@ -314,7 +314,7 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		for (int mipLevel = 0; mipLevel < mipLevels; mipLevel++) {
-			if (GLCreateFBO(CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel])) == FALSE) goto ERR;
+			if (GLCreateFBO(CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel]), gli::FORMAT_UNDEFINED) == FALSE) goto ERR;
 			{
 				glEnable(GL_TEXTURE_CUBE_MAP);
 				glActiveTexture(GL_TEXTURE0);

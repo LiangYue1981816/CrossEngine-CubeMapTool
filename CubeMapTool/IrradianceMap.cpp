@@ -257,7 +257,7 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 	BOOL rcode = TRUE;
 
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
-	if (GLCreateFBO(texture.extent().x, texture.extent().y) == FALSE) goto ERR;
+	if (GLCreateFBO(texture.extent().x, texture.extent().y, texture.format()) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));

@@ -7,14 +7,17 @@ GLuint fboTexture = 0;
 GLuint fboTextureWidth = 0;
 GLuint fboTextureHeight = 0;
 
-BOOL GLCreateFBO(int width, int height)
+BOOL GLCreateFBO(int width, int height, gli::format format)
 {
+	gli::gl GL(gli::gl::PROFILE_ES30);
+	gli::gl::format glFormat = GL.translate(format);
+
 	fboTextureWidth = width;
 	fboTextureHeight = height;
 
 	glGenTextures(1, &fboTexture);
 	glBindTexture(GL_TEXTURE_2D, fboTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fboTextureWidth, fboTextureHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, glFormat.Internal, fboTextureWidth, fboTextureHeight, 0, glFormat.External, glFormat.Type, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);

@@ -256,6 +256,9 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 
 	BOOL rcode = TRUE;
 
+	gli::gl GL(gli::gl::PROFILE_ES30);
+	gli::gl::format glFormat = GL.translate(texture.format());
+
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateFBO(texture.extent().x, texture.extent().y, texture.format()) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
@@ -292,7 +295,7 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 			{
 				glUniformMatrix4fv(uniformLocationTexcoordMatrix, 1, GL_FALSE, (const float *)&matTexcoords[index]);
 				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-				glReadPixels(0, 0, texture.extent().x, texture.extent().y, GL_BGR, GL_UNSIGNED_BYTE, texture.data(0, index, 0));
+				glReadPixels(0, 0, texture.extent().x, texture.extent().y, glFormat.External, glFormat.Type, texture.data(0, index, 0));
 			}
 		}
 		glDisableVertexAttribArray(attribLocationPosition);

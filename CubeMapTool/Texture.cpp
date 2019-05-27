@@ -103,19 +103,61 @@ glm::f32vec3 GetTexturePixelColor(const gli::texture_cube &texture, const glm::v
 	return texture.load<glm::f32vec3>(gli::texture_cube::extent_type(x, y), face, 0);
 }
 
-gli::texture2d ConvertTextureCubeToTexture2D(const gli::texture_cube &cube)
+gli::texture2d Preview(const gli::texture_cube &cube)
 {
 	//     +Y
 	// -X  +Z  +X  -Z
 	//     -Y
 
 	gli::texture2d texture(cube.format(), gli::extent2d(cube.extent().x * 4, cube.extent().y * 3));
-	texture.copy(cube, 0, TEXTURE_CUBE_MAP_POSITIVE_X, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 2, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
-	texture.copy(cube, 0, TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 0, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
-	texture.copy(cube, 0, TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 1, cube.extent().y * 0, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
-	texture.copy(cube, 0, TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 1, cube.extent().y * 2, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
-	texture.copy(cube, 0, TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 1, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
-	texture.copy(cube, 0, TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gli::extent3d(0, 0, 0), 0, 0, 0, gli::extent3d(cube.extent().x * 3, cube.extent().y * 1, 0), gli::extent3d(cube.extent().x, cube.extent().y, 0));
+
+	for (int y = 0; y < cube.extent().y; y++) {
+		for (int x = 0; x < cube.extent().x; x++) {
+			// TEXTURE_CUBE_MAP_POSITIVE_X
+			{
+				int xx = x + cube.extent().x * 2;
+				int yy = y + cube.extent().y * 1;
+				gli::f32vec3 color = GetTexturePixelColor(cube, x, y, TEXTURE_CUBE_MAP_POSITIVE_X);
+				SetTexturePixelColor(texture, xx, yy, 0, color);
+			}
+			// TEXTURE_CUBE_MAP_NEGATIVE_X
+			{
+				int xx = x + cube.extent().x * 0;
+				int yy = y + cube.extent().y * 1;
+				gli::f32vec3 color = GetTexturePixelColor(cube, x, y, TEXTURE_CUBE_MAP_NEGATIVE_X);
+				SetTexturePixelColor(texture, xx, yy, 0, color);
+			}
+			// TEXTURE_CUBE_MAP_POSITIVE_Y
+			{
+				int xx = x + cube.extent().x * 1;
+				int yy = y + cube.extent().y * 0;
+				gli::f32vec3 color = GetTexturePixelColor(cube, x, y, TEXTURE_CUBE_MAP_POSITIVE_Y);
+				SetTexturePixelColor(texture, xx, yy, 0, color);
+			}
+			// TEXTURE_CUBE_MAP_NEGATIVE_Y
+			{
+				int xx = x + cube.extent().x * 1;
+				int yy = y + cube.extent().y * 2;
+				gli::f32vec3 color = GetTexturePixelColor(cube, x, y, TEXTURE_CUBE_MAP_NEGATIVE_Y);
+				SetTexturePixelColor(texture, xx, yy, 0, color);
+			}
+			// TEXTURE_CUBE_MAP_POSITIVE_Z
+			{
+				int xx = x + cube.extent().x * 1;
+				int yy = y + cube.extent().y * 1;
+				gli::f32vec3 color = GetTexturePixelColor(cube, x, y, TEXTURE_CUBE_MAP_POSITIVE_Z);
+				SetTexturePixelColor(texture, xx, yy, 0, color);
+			}
+			// TEXTURE_CUBE_MAP_NEGATIVE_Z
+			{
+				int xx = x + cube.extent().x * 3;
+				int yy = y + cube.extent().y * 1;
+				gli::f32vec3 color = GetTexturePixelColor(cube, x, y, TEXTURE_CUBE_MAP_NEGATIVE_Z);
+				SetTexturePixelColor(texture, xx, yy, 0, color);
+			}
+		}
+	}
+
 	return texture;
 }
 

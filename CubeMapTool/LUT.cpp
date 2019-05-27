@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 
-BOOL GenerateLUT(IMAGE *pImage, int samples)
+BOOL GenerateLutMap(gli::texture2d &texLutMap, int samples)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -126,15 +126,18 @@ BOOL GenerateLUT(IMAGE *pImage, int samples)
 
 	BOOL rcode = TRUE;
 
+	gli::gl GL(gli::gl::PROFILE_ES30);
+	gli::gl::format glFormat = GL.translate(texLutMap.format());
+
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
-	if (GLCreateFBO(IMAGE_WIDTH(pImage), IMAGE_HEIGHT(pImage), gli::FORMAT_UNDEFINED) == FALSE) goto ERR;
+	if (GLCreateFBO(texLutMap.extent().x, texLutMap.extent().y, texLutMap.format()) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
 		glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 		glm::mat4 matModeViewProjection = matProjection * matModeView;
 
-		glViewport(0, 0, IMAGE_WIDTH(pImage), IMAGE_HEIGHT(pImage));
+		glViewport(0, 0, texLutMap.extent().x, texLutMap.extent().y);
 		glUseProgram(program);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -149,7 +152,7 @@ BOOL GenerateLUT(IMAGE *pImage, int samples)
 			glUniform1ui(uniformLocationSamples, samples);
 
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-			glReadPixels(0, 0, IMAGE_WIDTH(pImage), IMAGE_HEIGHT(pImage), GL_BGR, GL_UNSIGNED_BYTE, pImage->data);
+			glReadPixels(0, 0, texLutMap.extent().x, texLutMap.extent().y, glFormat.External, glFormat.Type, texLutMap.data(0, 0, 0));
 		}
 		glDisableVertexAttribArray(attribLocationPosition);
 		glDisableVertexAttribArray(attribLocationTexcoord);
@@ -158,6 +161,8 @@ BOOL GenerateLUT(IMAGE *pImage, int samples)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glUseProgram(0);
 	}
+
+	texLutMap = gli::flip(texLutMap);
 
 	goto RET;
 ERR:

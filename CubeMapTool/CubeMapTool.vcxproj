@@ -102,7 +102,7 @@
     <ClCompile Include="GfxFunctions.cpp" />
     <ClCompile Include="Irradiance.cpp" />
     <ClCompile Include="lodepng\lodepng.cpp" />
-    <ClCompile Include="LUT.cpp" />
+    <ClCompile Include="Lut.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mipmap.cpp" />
     <ClCompile Include="stdafx.cpp">

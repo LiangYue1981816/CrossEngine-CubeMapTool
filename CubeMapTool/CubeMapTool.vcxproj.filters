@@ -31,9 +31,6 @@
     <ClCompile Include="Irradiance.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LUT.cpp">
-      <Filter>CubeMapTool\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mipmap.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
@@ -48,5 +45,8 @@
       <Filter>ThirdParty</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Lut.cpp">
+      <Filter>CubeMapTool\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,11 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{589bdb5e-7930-4d12-bc53-c1a2e24b6c82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files">
+    <Filter Include="ThirdParty\Header Files">
+      <UniqueIdentifier>{0cc8cd92-d5de-4e85-a7e1-909a221d0f9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\Source Files">
+      <UniqueIdentifier>{b1d27825-316e-48b5-8d1b-6a298b9529d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CubeMapTool">
+      <UniqueIdentifier>{d314a0ae-fd3f-4b5d-bf1d-3ba1b0e7639f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CubeMapTool\Header Files">
+      <UniqueIdentifier>{2df21557-aed7-4560-93c3-5018d9d3c29f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CubeMapTool\Source Files">
+      <UniqueIdentifier>{f9071d28-157b-4708-9108-8f4934d7a7f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Remove">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
@@ -13,37 +27,37 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="GfxFunctions.h">
-      <Filter>Header Files</Filter>
+      <Filter>ThirdParty\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TexFunctions.h">
-      <Filter>Header Files</Filter>
+      <Filter>ThirdParty\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IrradianceMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CubeMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Mipmap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LUT.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lodepng\lodepng.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Remove</Filter>
     </ClCompile>
     <ClCompile Include="GfxFunctions.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ThirdParty\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lodepng\lodepng.cpp">
+      <Filter>ThirdParty\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TexFunctions.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ThirdParty\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Irradiance.cpp">
+      <Filter>CubeMapTool\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LUT.cpp">
+      <Filter>CubeMapTool\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>CubeMapTool\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mipmap.cpp">
+      <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -99,7 +99,7 @@
   <ItemGroup>
     <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="GfxFunctions.cpp" />
-    <ClCompile Include="IrradianceMap.cpp" />
+    <ClCompile Include="Irradiance.cpp" />
     <ClCompile Include="lodepng\lodepng.cpp" />
     <ClCompile Include="LUT.cpp" />
     <ClCompile Include="Main.cpp" />

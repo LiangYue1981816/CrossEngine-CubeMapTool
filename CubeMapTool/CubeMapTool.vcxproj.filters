@@ -4,12 +4,6 @@
     <Filter Include="ThirdParty">
       <UniqueIdentifier>{589bdb5e-7930-4d12-bc53-c1a2e24b6c82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ThirdParty\Header Files">
-      <UniqueIdentifier>{0cc8cd92-d5de-4e85-a7e1-909a221d0f9b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ThirdParty\Source Files">
-      <UniqueIdentifier>{b1d27825-316e-48b5-8d1b-6a298b9529d9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CubeMapTool">
       <UniqueIdentifier>{d314a0ae-fd3f-4b5d-bf1d-3ba1b0e7639f}</UniqueIdentifier>
     </Filter>
@@ -23,22 +17,13 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="GfxFunctions.h">
-      <Filter>ThirdParty\Header Files</Filter>
+      <Filter>CubeMapTool\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TexFunctions.h">
-      <Filter>ThirdParty\Header Files</Filter>
+      <Filter>CubeMapTool\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GfxFunctions.cpp">
-      <Filter>ThirdParty\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lodepng\lodepng.cpp">
-      <Filter>ThirdParty\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TexFunctions.cpp">
-      <Filter>ThirdParty\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Irradiance.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
@@ -53,6 +38,15 @@
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CubeMap.cpp" />
+    <ClCompile Include="GfxFunctions.cpp">
+      <Filter>CubeMapTool\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TexFunctions.cpp">
+      <Filter>CubeMapTool\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lodepng\lodepng.cpp">
+      <Filter>ThirdParty</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeMapTool,h">

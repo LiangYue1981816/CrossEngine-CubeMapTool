@@ -2,8 +2,8 @@
 #include "gli/gli.hpp"
 #include "gli/convert.hpp"
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 
 #define TEXTURE_CUBE_MAP_POSITIVE_X 0

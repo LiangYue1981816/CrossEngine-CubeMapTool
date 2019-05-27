@@ -19,10 +19,6 @@
     <Filter Include="CubeMapTool\Source Files">
       <UniqueIdentifier>{f9071d28-157b-4708-9108-8f4934d7a7f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Remove">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -34,9 +30,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CubeMap.cpp">
-      <Filter>Remove</Filter>
-    </ClCompile>
     <ClCompile Include="GfxFunctions.cpp">
       <Filter>ThirdParty\Source Files</Filter>
     </ClCompile>
@@ -59,5 +52,11 @@
     <ClCompile Include="Mipmap.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CubeMap.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CubeMapTool,h">
+      <Filter>CubeMapTool\Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

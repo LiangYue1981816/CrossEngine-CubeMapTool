@@ -31,9 +31,6 @@
     <ClCompile Include="LUT.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>CubeMapTool\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mipmap.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
@@ -47,6 +44,7 @@
     <ClCompile Include="lodepng\lodepng.cpp">
       <Filter>ThirdParty</Filter>
     </ClCompile>
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeMapTool,h">

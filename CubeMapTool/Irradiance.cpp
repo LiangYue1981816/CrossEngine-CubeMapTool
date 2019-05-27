@@ -306,6 +306,8 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 		glUseProgram(0);
 	}
 
+	texture = gli::flip(texture);
+
 	goto RET;
 ERR:
 	rcode = FALSE;

@@ -60,13 +60,9 @@ static void SHBasis(float basis[], glm::vec3 direction)
 	basis[8] = factors[8] * (x * y);
 }
 
-static void SH(float sh_red[], float sh_grn[], float sh_blu[], unsigned int color, glm::vec3 direction)
+static void SH(float sh_red[], float sh_grn[], float sh_blu[], float r, float g, float b, glm::vec3 direction)
 {
 	float basis[9] = { 0.0f };
-
-	float r = GET_RED(color) / 255.0f;
-	float g = GET_GRN(color) / 255.0f;
-	float b = GET_BLU(color) / 255.0f;
 
 	r = pow(r, 1.0f / 2.2f);
 	g = pow(g, 1.0f / 2.2f);
@@ -146,13 +142,13 @@ static void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *
 	}
 }
 
-static void GenerateIrradianceEnvMapSH(IMAGE *pEnvMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+static void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
 		glm::vec2 uv = SphericalSampleing(direction);
-		unsigned int color = IMAGE_GetPixelColor(pEnvMap, (int)(uv.x * (IMAGE_WIDTH(pEnvMap) - 1) + 0.5f), (int)((1.0f - uv.y) * (IMAGE_HEIGHT(pEnvMap) - 1) + 0.5f));
-		SH(sh_red, sh_grn, sh_blu, color, direction);
+		gli::f32vec3 color = GetTexturePixelColor(texture, (int)(uv.x * (texture.extent().x - 1) + 0.5f), (int)((1.0f - uv.y) * (texture.extent().y - 1) + 0.5f));
+		SH(sh_red, sh_grn, sh_blu, color.r, color.g, color.b, direction);
 	}
 
 	for (int index = 0; index < 9; index++) {
@@ -162,12 +158,12 @@ static void GenerateIrradianceEnvMapSH(IMAGE *pEnvMap, float *sh_red, float *sh_
 	}
 }
 
-static void GenerateIrradianceCubeMapSH(CUBEMAP *pCubeMap, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
-		unsigned int color = CubeMapGetPixelColor(pCubeMap, direction);
-		SH(sh_red, sh_grn, sh_blu, color, direction);
+		gli::f32vec3 color = GetTexturePixelColor(texture, direction);
+		SH(sh_red, sh_grn, sh_blu, color.r, color.g, color.b, direction);
 	}
 
 	for (int index = 0; index < 9; index++) {
@@ -319,6 +315,7 @@ RET:
 
 BOOL GenerateEnvIrradianceMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
 {
+	/*
 	float sh_red[9] = { 0.0f };
 	float sh_grn[9] = { 0.0f };
 	float sh_blu[9] = { 0.0f };
@@ -326,12 +323,13 @@ BOOL GenerateEnvIrradianceMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
 	GenerateIrradianceEnvMapSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
 	RenderIrradianceMap(pIrrMap, sh_red, sh_grn, sh_blu);
 	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
-
+	*/
 	return TRUE;
 }
 
 BOOL GenerateCubeIrradianceMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 {
+	/*
 	float sh_red[9] = { 0.0f };
 	float sh_grn[9] = { 0.0f };
 	float sh_blu[9] = { 0.0f };
@@ -339,7 +337,7 @@ BOOL GenerateCubeIrradianceMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
 	GenerateIrradianceCubeMapSH(pCubeMap, sh_red, sh_grn, sh_blu, samples);
 	RenderIrradianceMap(pIrrMap, sh_red, sh_grn, sh_blu);
 	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
-
+	*/
 	return TRUE;
 }
 

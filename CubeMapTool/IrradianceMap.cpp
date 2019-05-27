@@ -313,31 +313,29 @@ RET:
 	return rcode;
 }
 
-BOOL GenerateEnvIrradianceMap(IMAGE *pEnvMap, CUBEMAP *pIrrMap, int samples)
+BOOL GenerateEnvIrradianceMap(gli::texture2d &texEnvMap, gli::texture_cube &texIrrMap, int samples)
 {
-	/*
 	float sh_red[9] = { 0.0f };
 	float sh_grn[9] = { 0.0f };
 	float sh_blu[9] = { 0.0f };
 
-	GenerateIrradianceEnvMapSH(pEnvMap, sh_red, sh_grn, sh_blu, samples);
-	RenderIrradianceMap(pIrrMap, sh_red, sh_grn, sh_blu);
+	GenerateIrradianceEnvMapSH(texEnvMap, sh_red, sh_grn, sh_blu, samples);
+	RenderIrradianceMap(texIrrMap, sh_red, sh_grn, sh_blu);
 	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
-	*/
+
 	return TRUE;
 }
 
-BOOL GenerateCubeIrradianceMap(CUBEMAP *pCubeMap, CUBEMAP *pIrrMap, int samples)
+BOOL GenerateCubeIrradianceMap(gli::texture_cube &texCubeMap, gli::texture_cube &texIrrMap, int samples)
 {
-	/*
 	float sh_red[9] = { 0.0f };
 	float sh_grn[9] = { 0.0f };
 	float sh_blu[9] = { 0.0f };
 
-	GenerateIrradianceCubeMapSH(pCubeMap, sh_red, sh_grn, sh_blu, samples);
-	RenderIrradianceMap(pIrrMap, sh_red, sh_grn, sh_blu);
+	GenerateIrradianceCubeMapSH(texCubeMap, sh_red, sh_grn, sh_blu, samples);
+	RenderIrradianceMap(texIrrMap, sh_red, sh_grn, sh_blu);
 	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
-	*/
+
 	return TRUE;
 }
 

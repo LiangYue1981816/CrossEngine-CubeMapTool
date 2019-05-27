@@ -22,6 +22,9 @@
     <ClInclude Include="TexFunctions.h">
       <Filter>CubeMapTool\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CubeMapTool.h">
+      <Filter>CubeMapTool\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -45,10 +48,5 @@
       <Filter>ThirdParty</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="CubeMapTool,h">
-      <Filter>CubeMapTool\Header Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

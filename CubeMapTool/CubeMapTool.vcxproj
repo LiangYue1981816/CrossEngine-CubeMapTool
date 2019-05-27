@@ -92,6 +92,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CubeMapTool.h" />
     <ClInclude Include="GfxFunctions.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TexFunctions.h" />
@@ -109,9 +110,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TexFunctions.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="CubeMapTool,h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -205,7 +205,7 @@ RET:
 	return rcode;
 }
 
-BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, int samples)
+BOOL GenerateCubeMipmaps(gli::texture_cube &texCubeMap, gli::texture_cube &texCubeMipmap, int samples)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -314,13 +314,17 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
 	BOOL rcode = TRUE;
-	GLuint texture = CreateTextureCube(pCubeMap);
 
+	gli::gl GL(gli::gl::PROFILE_ES30);
+	gli::gl::format glFormat = GL.translate(texCubeMipmap.format());
+
+	GLuint texture = 0;
+	if (GLCreateTextureCube(texCubeMap, texture) == FALSE) goto ERR;
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
-		for (int mipLevel = 0; mipLevel < mipLevels; mipLevel++) {
-			if (GLCreateFBO(CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel]), gli::FORMAT_UNDEFINED) == FALSE) goto ERR;
+		for (int mipLevel = 0; mipLevel < (int)texCubeMipmap.levels(); mipLevel++) {
+			if (GLCreateFBO(texCubeMipmap.extent(mipLevel).x, texCubeMipmap.extent(mipLevel).y, texCubeMipmap.format()) == FALSE) goto ERR;
 			{
 				glEnable(GL_TEXTURE_CUBE_MAP);
 				glActiveTexture(GL_TEXTURE0);
@@ -343,7 +347,7 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 						glm::rotate(glm::mat4(),  PI, glm::vec3(0.0f, 1.0f, 0.0f)),
 					};
 
-					glViewport(0, 0, CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel]));
+					glViewport(0, 0, texCubeMipmap.extent(mipLevel).x, texCubeMipmap.extent(mipLevel).y);
 					glUseProgram(program);
 					glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 					glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -355,7 +359,7 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 						glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
 
 						glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
-						glUniform1f(uniformLocationRoughness, mipLevel / (mipLevels - 1.0f));
+						glUniform1f(uniformLocationRoughness, mipLevel / (texCubeMipmap.levels() - 1.0f));
 						glUniform1ui(uniformLocationSamples, samples);
 						glUniform1i(uniformLocationCubemap, 0);
 
@@ -363,7 +367,7 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 						{
 							glUniformMatrix4fv(uniformLocationTexcoordMatrix, 1, GL_FALSE, (const float *)&matTexcoords[index]);
 							glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-							glReadPixels(0, 0, CUBEMAP_WIDTH(&pMipmaps[mipLevel]), CUBEMAP_HEIGHT(&pMipmaps[mipLevel]), GL_BGR, GL_UNSIGNED_BYTE, pMipmaps[mipLevel].faces[index].data);
+							glReadPixels(0, 0, texCubeMipmap.extent(mipLevel).x, texCubeMipmap.extent(mipLevel).y, glFormat.External, glFormat.Type, texCubeMipmap.data(0, index, mipLevel));
 						}
 					}
 					glDisableVertexAttribArray(attribLocationPosition);
@@ -379,6 +383,8 @@ BOOL GenerateCubeMipmaps(CUBEMAP *pCubeMap, CUBEMAP pMipmaps[], int mipLevels, i
 		}
 	}
 
+	texCubeMipmap = gli::flip(texCubeMipmap);
+
 	goto RET;
 ERR:
 	rcode = FALSE;
@@ -386,7 +392,7 @@ RET:
 	GLDestroyVBO();
 	GLDestroyFBO();
 	GLDestroyProgram();
-	DestroyTexture(texture);
+	GLDestroyTexture(texture);
 
 	return rcode;
 }

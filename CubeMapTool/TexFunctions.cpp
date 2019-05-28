@@ -6,7 +6,16 @@ gli::texture2d LoadTexture2D(const char *szFileName)
 	gli::texture2d texture = (gli::texture2d)gli::load(szFileName);
 	if (texture.empty()) return gli::texture2d();
 	if (gli::is_compressed(texture.format())) return gli::texture2d();
-	return gli::convert<gli::texture2d>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+
+	if (gli::is_float(texture.format()) || gli::is_srgb(texture.format()) == false) {
+		texture = gli::convert<gli::texture2d>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+		texture = ConvertLinearToSRGB(texture);
+	}
+	else {
+		texture = gli::convert<gli::texture2d>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+	}
+
+	return texture;
 }
 
 gli::texture_cube LoadTextureCube(const char *szFileName)
@@ -14,7 +23,48 @@ gli::texture_cube LoadTextureCube(const char *szFileName)
 	gli::texture_cube texture = (gli::texture_cube)gli::load(szFileName);
 	if (texture.empty()) return gli::texture_cube();
 	if (gli::is_compressed(texture.format())) return gli::texture_cube();
-	return gli::convert<gli::texture_cube>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+
+	if (gli::is_float(texture.format()) || gli::is_srgb(texture.format()) == false) {
+		texture = gli::convert<gli::texture_cube>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+		texture = ConvertLinearToSRGB(texture);
+	}
+	else {
+		texture = gli::convert<gli::texture_cube>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+	}
+
+	return texture;
+}
+
+gli::texture2d ConvertLinearToSRGB(const gli::texture2d &texture)
+{
+	gli::texture2d texConvert(texture.format(), texture.extent());
+	{
+		for (int y = 0; y < texture.extent().y; y++) {
+			for (int x = 0; x < texture.extent().x; x++) {
+				gli::f32vec3 color = texture.load<glm::f32vec3>(gli::texture2d::extent_type(x, y), 0);
+				color = gli::convertLinearToSRGB(color);
+				texConvert.store(gli::extent2d(x, y), 0, color);
+			}
+		}
+	}
+	return texConvert;
+}
+
+gli::texture_cube ConvertLinearToSRGB(const gli::texture_cube &texture)
+{
+	gli::texture_cube texConvert(texture.format(), texture.extent());
+	{
+		for (int face = 0; face < 6; face++) {
+			for (int y = 0; y < texture.extent().y; y++) {
+				for (int x = 0; x < texture.extent().x; x++) {
+					gli::f32vec3 color = texture.load<glm::f32vec3>(gli::texture_cube::extent_type(x, y), face, 0);
+					color = gli::convertLinearToSRGB(color);
+					texConvert.store(gli::extent2d(x, y), face, 0, color);
+				}
+			}
+		}
+	}
+	return texConvert;
 }
 
 void SetTexturePixelColor(gli::texture2d &texture, int x, int y, int level, const glm::f32vec3 &color)

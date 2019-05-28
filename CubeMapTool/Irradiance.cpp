@@ -315,6 +315,7 @@ RET:
 	GLDestroyVBO();
 	GLDestroyFBO();
 	GLDestroyProgram();
+
 	return rcode;
 }
 
@@ -343,5 +344,4 @@ BOOL GenerateCubeIrradianceMap(gli::texture_cube &texCubeMap, gli::texture_cube 
 
 	return TRUE;
 }
-
 #pragma endregion

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 
-BOOL GenerateEnvMipmaps(gli::texture2d &texEnv, gli::texture2d &texEnvMipmap, int samples)
+BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap, int samples)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -139,7 +139,7 @@ BOOL GenerateEnvMipmaps(gli::texture2d &texEnv, gli::texture2d &texEnvMipmap, in
 	gli::gl::format glFormat = GL.translate(texEnvMipmap.format());
 
 	GLuint texture = 0;
-	if (GLCreateTexture2D(texEnv, texture) == FALSE) goto ERR;
+	if (GLCreateTexture2D(texEnvMap, texture) == FALSE) goto ERR;
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 
-BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int samples)
+BOOL GenerateEnvMipmaps(gli::texture2d &texEnv, gli::texture2d &texEnvMipmap, int samples)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -134,13 +134,17 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
 
 	BOOL rcode = TRUE;
-	GLuint texture = CreateTexture2D(pEnvMap);
 
+	gli::gl GL(gli::gl::PROFILE_ES30);
+	gli::gl::format glFormat = GL.translate(texEnvMipmap.format());
+
+	GLuint texture = 0;
+	if (GLCreateTexture2D(texEnv, texture) == FALSE) goto ERR;
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
-		for (int mipLevel = 0; mipLevel < mipLevels; mipLevel++) {
-			if (GLCreateFBO(IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel]), gli::FORMAT_UNDEFINED) == FALSE) goto ERR;
+		for (int mipLevel = 0; mipLevel < (int)texEnvMipmap.levels(); mipLevel++) {
+			if (GLCreateFBO(texEnvMipmap.extent(mipLevel).x, texEnvMipmap.extent(mipLevel).y, texEnvMipmap.format()) == FALSE) goto ERR;
 			{
 				glEnable(GL_TEXTURE_2D);
 				glActiveTexture(GL_TEXTURE0);
@@ -155,7 +159,7 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 					glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 					glm::mat4 matModeViewProjection = matProjection * matModeView;
 
-					glViewport(0, 0, IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel]));
+					glViewport(0, 0, texEnvMipmap.extent(mipLevel).x, texEnvMipmap.extent(mipLevel).y);
 					glUseProgram(program);
 					glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 					glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -167,12 +171,12 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 						glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
 
 						glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
-						glUniform1f(uniformLocationRoughness, mipLevel / (mipLevels - 1.0f));
+						glUniform1f(uniformLocationRoughness, mipLevel / (texEnvMipmap.levels() - 1.0f));
 						glUniform1ui(uniformLocationSamples, samples);
 						glUniform1i(uniformLocationEnvmap, 0);
 
 						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-						glReadPixels(0, 0, IMAGE_WIDTH(&pMipmaps[mipLevel]), IMAGE_HEIGHT(&pMipmaps[mipLevel]), GL_BGR, GL_UNSIGNED_BYTE, pMipmaps[mipLevel].data);
+						glReadPixels(0, 0, texEnvMipmap.extent(mipLevel).x, texEnvMipmap.extent(mipLevel).y, glFormat.External, glFormat.Type, texEnvMipmap.data(0, 0, mipLevel));
 					}
 					glDisableVertexAttribArray(attribLocationPosition);
 					glDisableVertexAttribArray(attribLocationTexcoord);
@@ -187,6 +191,8 @@ BOOL GenerateEnvMipmaps(IMAGE *pEnvMap, IMAGE pMipmaps[], int mipLevels, int sam
 		}
 	}
 
+	texEnvMipmap = gli::flip(texEnvMipmap);
+
 	goto RET;
 ERR:
 	rcode = FALSE;
@@ -194,7 +200,7 @@ RET:
 	GLDestroyVBO();
 	GLDestroyFBO();
 	GLDestroyProgram();
-	DestroyTexture(texture);
+	GLDestroyTexture(texture);
 
 	return rcode;
 }

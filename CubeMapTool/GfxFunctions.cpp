@@ -1,25 +1,24 @@
 #include "stdafx.h"
 
 
-GLuint GLCreateTexture2D(const gli::texture2d &texture)
+BOOL GLCreateTexture2D(const gli::texture2d &texture, GLuint &tex)
 {
 	gli::gl GL(gli::gl::PROFILE_ES30);
 	gli::gl::format format = GL.translate(texture.format(), texture.swizzles());
 
-	GLuint tex = 0;
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, format.Internal, texture.extent().x, texture.extent().y, 0, format.External, format.Type, texture.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
-	return tex;
+
+	return TRUE;
 }
 
-GLuint GLCreateTextureCube(const gli::texture_cube &texture)
+BOOL GLCreateTextureCube(const gli::texture_cube &texture, GLuint &tex)
 {
 	gli::gl GL(gli::gl::PROFILE_ES30);
 	gli::gl::format format = GL.translate(texture.format(), texture.swizzles());
 
-	GLuint tex = 0;
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format.Internal, texture.extent().x, texture.extent().y, 0, format.External, format.Type, texture.data(0, 0, 0));
@@ -29,12 +28,13 @@ GLuint GLCreateTextureCube(const gli::texture_cube &texture)
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format.Internal, texture.extent().x, texture.extent().y, 0, format.External, format.Type, texture.data(0, 4, 0));
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format.Internal, texture.extent().x, texture.extent().y, 0, format.External, format.Type, texture.data(0, 5, 0));
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	return tex;
+
+	return TRUE;
 }
 
-void GLDestroyTexture(GLuint texture)
+void GLDestroyTexture(GLuint tex)
 {
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(1, &tex);
 }
 
 

@@ -4,9 +4,9 @@
 #include <windows.h>
 
 
-GLuint GLCreateTexture2D(const gli::texture2d &texture);
-GLuint GLCreateTextureCube(const gli::texture_cube &texture);
-void GLDestroyTexture(GLuint texture);
+BOOL GLCreateTexture2D(const gli::texture2d &texture, GLuint &tex);
+BOOL GLCreateTextureCube(const gli::texture_cube &texture, GLuint &tex);
+void GLDestroyTexture(GLuint tex);
 
 extern GLuint rbo;
 extern GLuint fbo;

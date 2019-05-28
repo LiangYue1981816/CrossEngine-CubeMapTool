@@ -7,7 +7,7 @@ gli::texture2d LoadTexture2D(const char *szFileName)
 	if (texture.empty()) return gli::texture2d();
 	if (gli::is_compressed(texture.format())) return gli::texture2d();
 
-	if (gli::is_float(texture.format()) || gli::is_srgb(texture.format()) == false) {
+	if (gli::is_float(texture.format())) {
 		texture = gli::convert<gli::texture2d>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
 		texture = ConvertLinearToGamma(texture);
 	}
@@ -24,7 +24,7 @@ gli::texture_cube LoadTextureCube(const char *szFileName)
 	if (texture.empty()) return gli::texture_cube();
 	if (gli::is_compressed(texture.format())) return gli::texture_cube();
 
-	if (gli::is_float(texture.format()) || gli::is_srgb(texture.format()) == false) {
+	if (gli::is_float(texture.format())) {
 		texture = gli::convert<gli::texture_cube>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
 		texture = ConvertLinearToGamma(texture);
 	}

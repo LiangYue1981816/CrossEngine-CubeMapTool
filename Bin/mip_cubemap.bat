@@ -1,2 +1,2 @@
-CubeMapTool.exe -mip-cube Cube.dds
+CubeMapTool.exe -mip-cube Cube.dds CubeMipmap.dds
 pause

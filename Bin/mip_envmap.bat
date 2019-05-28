@@ -1,2 +1,2 @@
-CubeMapTool.exe -mip Env.bmp
+CubeMapTool.exe -mip-env Env.dds
 pause

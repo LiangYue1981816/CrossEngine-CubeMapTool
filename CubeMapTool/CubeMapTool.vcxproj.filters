@@ -34,7 +34,6 @@
     <ClCompile Include="Mipmap.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="GfxFunctions.cpp">
       <Filter>CubeMapTool\Source Files</Filter>
     </ClCompile>

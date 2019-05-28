@@ -15,12 +15,19 @@
 
 
 template <typename texture_type>
-texture_type LoadTexture(const char *szFileName)
+texture_type LoadTexture(const char *szFileName, bool bConvertToFloatFormat)
 {
 	texture_type texture = (texture_type)gli::load(szFileName);
 	if (texture.empty()) return texture_type();
 	if (gli::is_compressed(texture.format())) return texture_type();
-	return gli::convert<texture_type>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+
+	if (bConvertToFloatFormat) {
+		return gli::convert<texture_type>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+	}
+	else {
+		return texture;
+//		return gli::convert<texture_type>(texture, gli::FORMAT_RGB8_UNORM_PACK8);
+	}
 }
 
 void SetTexturePixelColor(gli::texture2d &texture, int x, int y, int level, const glm::f32vec3 &color);

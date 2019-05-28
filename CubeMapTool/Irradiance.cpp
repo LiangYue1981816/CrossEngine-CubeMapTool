@@ -64,10 +64,9 @@ static void SH(float sh_red[], float sh_grn[], float sh_blu[], float r, float g,
 {
 	float basis[9] = { 0.0f };
 
-	// Gamma to Linear
-	r = pow(r, 2.2f);
-	g = pow(g, 2.2f);
-	b = pow(b, 2.2f);
+	r = pow(r, 1.0f / 2.2f);
+	g = pow(g, 1.0f / 2.2f);
+	b = pow(b, 1.0f / 2.2f);
 
 	SHBasis(basis, direction);
 
@@ -243,7 +242,7 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
 				direction.xyz = normalize(direction.xyz);                                           \n\
 				gl_FragColor.rgb = SH(direction.xyz);                                               \n\
-				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(1.0f / 2.2f));                        \n\
+				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
 		";
 

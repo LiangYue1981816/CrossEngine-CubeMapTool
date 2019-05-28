@@ -1,6 +1,6 @@
 #pragma once
-#include "glew.h"
-#include "glut.h"
+#include "gl/glew.h"
+#include "gl/glut.h"
 #include <windows.h>
 
 

@@ -1,6 +1,22 @@
 #include "stdafx.h"
 
 
+gli::texture2d LoadTexture2D(const char *szFileName)
+{
+	gli::texture2d texture = (gli::texture2d)gli::load(szFileName);
+	if (texture.empty()) return gli::texture2d();
+	if (gli::is_compressed(texture.format())) return gli::texture2d();
+	return gli::convert<gli::texture2d>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+}
+
+gli::texture_cube LoadTextureCube(const char *szFileName)
+{
+	gli::texture_cube texture = (gli::texture_cube)gli::load(szFileName);
+	if (texture.empty()) return gli::texture_cube();
+	if (gli::is_compressed(texture.format())) return gli::texture_cube();
+	return gli::convert<gli::texture_cube>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
+}
+
 void SetTexturePixelColor(gli::texture2d &texture, int x, int y, int level, const glm::f32vec3 &color)
 {
 	texture.store(gli::extent2d(x, y), level, color);

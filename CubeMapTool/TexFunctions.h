@@ -14,15 +14,8 @@
 #define TEXTURE_CUBE_MAP_NEGATIVE_Z 5
 
 
-template <typename texture_type>
-texture_type LoadTexture(const char *szFileName)
-{
-	texture_type texture = (texture_type)gli::load(szFileName);
-	if (texture.empty()) return texture_type();
-	if (gli::is_compressed(texture.format())) return texture_type();
-	return gli::convert<texture_type>(texture, gli::FORMAT_RGB32_SFLOAT_PACK32);
-}
-
+gli::texture2d LoadTexture2D(const char *szFileName);
+gli::texture_cube LoadTextureCube(const char *szFileName);
 void SetTexturePixelColor(gli::texture2d &texture, int x, int y, int level, const glm::f32vec3 &color);
 void SetTexturePixelColor(gli::texture_cube &texture, int x, int y, int face, int level, const glm::f32vec3 &color);
 glm::f32vec3 GetTexturePixelColor(const gli::texture2d &texture, int x, int y);

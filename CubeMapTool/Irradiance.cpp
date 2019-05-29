@@ -152,9 +152,9 @@ static void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_
 	}
 
 	for (int index = 0; index < 9; index++) {
-		sh_red[index] *= factors[index] * PI * 4.0f / samples;
-		sh_grn[index] *= factors[index] * PI * 4.0f / samples;
-		sh_blu[index] *= factors[index] * PI * 4.0f / samples;
+		sh_red[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_grn[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_blu[index] *= a[index] * factors[index] * PI * 4.0f / samples;
 	}
 }
 
@@ -167,9 +167,9 @@ static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float 
 	}
 
 	for (int index = 0; index < 9; index++) {
-		sh_red[index] *= factors[index] * PI * 4.0f / samples;
-		sh_grn[index] *= factors[index] * PI * 4.0f / samples;
-		sh_blu[index] *= factors[index] * PI * 4.0f / samples;
+		sh_red[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_grn[index] *= a[index] * factors[index] * PI * 4.0f / samples;
+		sh_blu[index] *= a[index] * factors[index] * PI * 4.0f / samples;
 	}
 }
 

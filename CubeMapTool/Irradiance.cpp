@@ -27,9 +27,9 @@ static const float factors[9] = {
 	0.282095f, // Y(0,  0)
 
 	// L1
-	0.488603f, // Y(1, -1) (x)
+	0.488603f, // Y(1, -1) (y)
 	0.488603f, // Y(1,  0) (z)
-	0.488603f, // Y(1, +1) (y)
+	0.488603f, // Y(1, +1) (x)
 
 	// L2
 	1.092548f, // Y(2, -2) (x * y)
@@ -47,9 +47,9 @@ static void SHBasis(float basis[], glm::vec3 direction)
 
 	basis[0] = factors[0];
 
-	basis[1] = factors[1] * x;
+	basis[1] = factors[1] * y;
 	basis[2] = factors[2] * z;
-	basis[3] = factors[3] * y;
+	basis[3] = factors[3] * x;
 
 	basis[4] = factors[4] * (x * y);
 	basis[5] = factors[5] * (y * z);
@@ -215,9 +215,9 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 																									\n\
 				basis[0] = 1.0f;                                                                    \n\
 																									\n\
-				basis[1] = x;                                                                       \n\
+				basis[1] = y;                                                                       \n\
 				basis[2] = z;                                                                       \n\
-				basis[3] = y;                                                                       \n\
+				basis[3] = x;                                                                       \n\
 																									\n\
 				basis[4] = (x * y);                                         						\n\
 				basis[5] = (y * z);                                                                 \n\

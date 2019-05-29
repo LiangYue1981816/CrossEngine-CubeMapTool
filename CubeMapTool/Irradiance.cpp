@@ -6,22 +6,6 @@
 // http://cseweb.ucsd.edu/~ravir/papers/envmap/envmap.pdf
 
 static const float a[9] = {
-	//*
-	// L0
-	1.0f,
-
-	// L1
-	1.0f,
-	1.0f,
-	1.0f,
-
-	// L2
-	1.0f,
-	1.0f,
-	1.0f,
-	1.0f,
-	1.0f
-	/*/
 	// L0
 	3.141593f / 3.141593f,
 
@@ -35,60 +19,43 @@ static const float a[9] = {
 	0.785398f / 3.141593f,
 	0.785398f / 3.141593f,
 	0.785398f / 3.141593f,
-	0.785398f / 3.141593f
-	// L0
-	0.88622702317327315839103888423359f,
-
-	// L1
-	1.0233266579169159691709160221495f,
-	1.0233266579169159691709160221495f,
-	1.0233266579169159691709160221495f,
-
-	// L2
-	0.49541580913239741539330368514174f,
-	0.49541580913239741539330368514174f,
-	0.49541580913239741539330368514174f,
-	0.49541580913239741539330368514174f,
-	0.49541580913239741539330368514174f
-	//*/
+	0.785398f / 3.141593f,
 };
 
 static const float factors[9] = {
 	// L0
-	0.28209479177387814347403972578039f,
+	0.282095f, // Y(0,  0)
 
 	// L1
-	0.48860251190291992158638462283835f,
-	0.48860251190291992158638462283835f,
-	0.48860251190291992158638462283835f,
+	0.488603f, // Y(1, -1) (x)
+	0.488603f, // Y(1,  0) (z)
+	0.488603f, // Y(1, +1) (y)
 
 	// L2
-	0.31539156525252000603089369029571f,
-	1.0925484305920790705433857058027f,
-	1.0925484305920790705433857058027f,
-	0.54627421529603953527169285290134f,
-	0.54627421529603953527169285290134f
+	1.092548f, // Y(2, -2) (x * y)
+	1.092548f, // Y(2, -1) (y * z)
+	0.315392f, // Y(2,  0) (z * z * 3 - 1)
+	1.092548f, // Y(2, +1) (x * z)
+	0.546274f, // Y(2, +2) (x * x - y * y)
 };
 
 static void SHBasis(float basis[], glm::vec3 direction)
 {
-	// https://zh.wikipedia.org/wiki/%E7%90%83%E8%B0%90%E5%87%BD%E6%95%B0
-
 	float x = direction.x;
 	float y = direction.y;
 	float z = direction.z;
 
 	basis[0] = factors[0];
 
-	basis[1] = factors[1] * z;
-	basis[2] = factors[2] * x;
+	basis[1] = factors[1] * x;
+	basis[2] = factors[2] * z;
 	basis[3] = factors[3] * y;
 
-	basis[4] = factors[4] * (z * z * 2.0f - x * x - y * y);
-	basis[5] = factors[5] * (z * x);
-	basis[6] = factors[6] * (y * z);
-	basis[7] = factors[7] * (x * x - y * y);
-	basis[8] = factors[8] * (x * y);
+	basis[4] = factors[4] * (x * y);
+	basis[5] = factors[5] * (y * z);
+	basis[6] = factors[6] * (z * z * 3.0f - 1.0f);
+	basis[7] = factors[7] * (x * z);
+	basis[8] = factors[8] * (x * x - y * y);
 }
 
 static void SH(float sh_red[], float sh_grn[], float sh_blu[], float r, float g, float b, glm::vec3 direction)
@@ -248,15 +215,15 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 																									\n\
 				basis[0] = 1.0f;                                                                    \n\
 																									\n\
-				basis[1] = z;                                                                       \n\
-				basis[2] = x;                                                                       \n\
+				basis[1] = x;                                                                       \n\
+				basis[2] = z;                                                                       \n\
 				basis[3] = y;                                                                       \n\
 																									\n\
-				basis[4] = (z * z * 2.0f - x * x - y * y);                                          \n\
-				basis[5] = (z * x);                                                                 \n\
-				basis[6] = (y * z);                                                                 \n\
-				basis[7] = (x * x - y * y);                                                         \n\
-				basis[8] = (x * y);                                                                 \n\
+				basis[4] = (x * y);                                         						\n\
+				basis[5] = (y * z);                                                                 \n\
+				basis[6] = (z * z * 3.0f - 1.0f);                                                   \n\
+				basis[7] = (x * z);                                                                 \n\
+				basis[8] = (x * x - y * y);                                                         \n\
 																									\n\
 				for (int index = 0; index < 9; index++)                                             \n\
 				{                                                                                   \n\

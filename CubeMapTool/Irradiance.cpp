@@ -191,7 +191,7 @@ static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float 
 	}
 }
 
-static BOOL NormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
+static BOOL RenderNormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -215,11 +215,12 @@ static BOOL NormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &tex
 		"                                                                                           \n\
 			#version 330                                                                            \n\
 																									\n\
+			#define PI 3.1415926535897932384626433832795f                                           \n\
+																									\n\
 			uniform float _sh_red[9];                                                               \n\
 			uniform float _sh_grn[9];                                                               \n\
 			uniform float _sh_blu[9];                                                               \n\
 																									\n\
-			uniform mat4 _texcoordMatrix;                                                           \n\
 			uniform sampler2D _envmap;                                                              \n\
 																									\n\
 			varying vec4 texcoord;                                                                  \n\
@@ -275,7 +276,10 @@ static BOOL NormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &tex
 				vec3 direction = SphericalToDirection(texcoord.xy);                                 \n\
 				direction = normalize(direction);                                                   \n\
 				vec3 sh = SH(direction.xyz);														\n\
-				vec3 color = pow(texture(envmap, texcoord.xy).rgb, vec3(1.0f / 2.2f));				\n\
+																									\n\
+				vec2 uv = vec2(texcoord.x, 1.0f - texcoord.y);										\n\
+				vec3 color = pow(texture(_envmap, uv).rgb, vec3(1.0f / 2.2f));						\n\
+																									\n\
 				gl_FragColor.rgb = color / sh;														\n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
@@ -515,6 +519,10 @@ BOOL GenerateEnvIrradianceMap(gli::texture2d &texEnvMap, gli::texture_cube &texI
 	GenerateIrradianceEnvMapSH(texEnvMap, sh_red, sh_grn, sh_blu, samples);
 	RenderIrradianceMap(texIrrMap, sh_red, sh_grn, sh_blu);
 	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
+
+	//gli::texture2d texNormalizeMap(texEnvMap.format(), texEnvMap.extent());
+	//RenderNormalizeEnvMap(texEnvMap, texNormalizeMap, sh_red, sh_grn, sh_blu);
+	//gli::save_dds(texNormalizeMap, "result.dds");
 
 	return TRUE;
 }

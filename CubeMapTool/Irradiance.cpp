@@ -7,19 +7,19 @@
 
 static const float a[9] = {
 	// L0
-	3.141593f / PI,
+	3.141593f,
 
 	// L1
-	2.094395f / PI,
-	2.094395f / PI,
-	2.094395f / PI,
+	2.094395f,
+	2.094395f,
+	2.094395f,
 
 	// L2
-	0.785398f / PI,
-	0.785398f / PI,
-	0.785398f / PI,
-	0.785398f / PI,
-	0.785398f / PI,
+	0.785398f,
+	0.785398f,
+	0.785398f,
+	0.785398f,
+	0.785398f,
 };
 
 static const float factors[9] = {
@@ -62,9 +62,15 @@ static void SH(float sh_red[], float sh_grn[], float sh_blu[], float r, float g,
 {
 	float basis[9] = { 0.0f };
 
+	// Gamma to linear
 	r = pow(r, 1.0f / 2.2f);
 	g = pow(g, 1.0f / 2.2f);
 	b = pow(b, 1.0f / 2.2f);
+
+	// Diffuse Lambert
+	r /= PI;
+	g /= PI;
+	b /= PI;
 
 	SHBasis(basis, direction);
 

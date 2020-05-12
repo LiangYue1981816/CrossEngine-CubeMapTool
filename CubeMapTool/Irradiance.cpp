@@ -191,7 +191,7 @@ static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float 
 	}
 }
 
-static BOOL NormalizeEnvMap(gli::texture2d &texNormalizeEnvMap, float *sh_red, float *sh_grn, float *sh_blu)
+static BOOL NormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -292,14 +292,14 @@ static BOOL NormalizeEnvMap(gli::texture2d &texNormalizeEnvMap, float *sh_red, f
 	BOOL rcode = TRUE;
 
 	gli::gl GL(gli::gl::PROFILE_ES30);
-	gli::gl::format glFormat = GL.translate(texNormalizeEnvMap.format());
+	gli::gl::format glFormat = GL.translate(texNormalizeMap.format());
 
 	GLuint texture = 0;
-	if (GLCreateTexture2D(texNormalizeEnvMap, texture) == FALSE) goto ERR;
+	if (GLCreateTexture2D(texEnvMap, texture) == FALSE) goto ERR;
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
-		if (GLCreateFBO(texNormalizeEnvMap.extent().x, texNormalizeEnvMap.extent().y, texNormalizeEnvMap.format()) == FALSE) goto ERR;
+		if (GLCreateFBO(texNormalizeMap.extent().x, texNormalizeMap.extent().y, texNormalizeMap.format()) == FALSE) goto ERR;
 		{
 			glEnable(GL_TEXTURE_2D);
 			glActiveTexture(GL_TEXTURE0);
@@ -314,7 +314,7 @@ static BOOL NormalizeEnvMap(gli::texture2d &texNormalizeEnvMap, float *sh_red, f
 				glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 				glm::mat4 matModeViewProjection = matProjection * matModeView;
 
-				glViewport(0, 0, texNormalizeEnvMap.extent().x, texNormalizeEnvMap.extent().y);
+				glViewport(0, 0, texNormalizeMap.extent().x, texNormalizeMap.extent().y);
 				glUseProgram(program);
 				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 				glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -326,13 +326,13 @@ static BOOL NormalizeEnvMap(gli::texture2d &texNormalizeEnvMap, float *sh_red, f
 					glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
 
 					glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
-					glUniform1i(uniformLocationEnvmap, 0);
 					glUniform1fv(uniformLocationSHRed, 9, sh_red);
 					glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
 					glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
+					glUniform1i(uniformLocationEnvmap, 0);
 
 					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
-					glReadPixels(0, 0, texNormalizeEnvMap.extent().x, texNormalizeEnvMap.extent().y, glFormat.External, glFormat.Type, texNormalizeEnvMap.data(0, 0, 0));
+					glReadPixels(0, 0, texNormalizeMap.extent().x, texNormalizeMap.extent().y, glFormat.External, glFormat.Type, texNormalizeMap.data(0, 0, 0));
 				}
 				glDisableVertexAttribArray(attribLocationPosition);
 				glDisableVertexAttribArray(attribLocationTexcoord);
@@ -346,7 +346,7 @@ static BOOL NormalizeEnvMap(gli::texture2d &texNormalizeEnvMap, float *sh_red, f
 		GLDestroyFBO();
 	}
 
-	texNormalizeEnvMap = gli::flip(texNormalizeEnvMap);
+	texNormalizeMap = gli::flip(texNormalizeMap);
 
 	goto RET;
 ERR:

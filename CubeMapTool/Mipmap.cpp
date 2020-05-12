@@ -31,7 +31,43 @@ BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap,
 			uniform float _roughness;                                                               \n\
 			uniform sampler2D _envmap;                                                              \n\
 																									\n\
+			uniform float _sh_red[9];                                                               \n\
+			uniform float _sh_grn[9];                                                               \n\
+			uniform float _sh_blu[9];                                                               \n\
+																									\n\
 			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			vec3 SH(vec3 direction)                                                                 \n\
+			{                                                                                       \n\
+				float basis[9];                                                                     \n\
+																									\n\
+				float x = direction.x;                                                              \n\
+				float y = direction.y;                                                              \n\
+				float z = direction.z;                                                              \n\
+																									\n\
+				vec3 color = vec3(0.0f, 0.0f, 0.0f);                                                \n\
+																									\n\
+				basis[0] = 1.0f;                                                                    \n\
+																									\n\
+				basis[1] = y;                                                                       \n\
+				basis[2] = z;                                                                       \n\
+				basis[3] = x;                                                                       \n\
+																									\n\
+				basis[4] = (x * y);                                         						\n\
+				basis[5] = (y * z);                                                                 \n\
+				basis[6] = (z * z * 3.0f - 1.0f);                                                   \n\
+				basis[7] = (x * z);                                                                 \n\
+				basis[8] = (x * x - y * y);                                                         \n\
+																									\n\
+				for (int index = 0; index < 9; index++)                                             \n\
+				{                                                                                   \n\
+					color.r += _sh_red[index] * basis[index];                                       \n\
+					color.g += _sh_grn[index] * basis[index];                                       \n\
+					color.b += _sh_blu[index] * basis[index];                                       \n\
+				}                                                                                   \n\
+																									\n\
+				return color;                                                                       \n\
+			}                                                                                       \n\
 																									\n\
 			float RadicalInverse(uint bits)                                                         \n\
 			{                                                                                       \n\
@@ -235,9 +271,45 @@ BOOL GenerateCubeMipmaps(gli::texture_cube &texCubeMap, gli::texture_cube &texCu
 			uniform float _roughness;                                                               \n\
 			uniform samplerCube _cubemap;                                                           \n\
 																									\n\
+			uniform float _sh_red[9];                                                               \n\
+			uniform float _sh_grn[9];                                                               \n\
+			uniform float _sh_blu[9];                                                               \n\
+																									\n\
 			uniform mat4 _texcoordMatrix;                                                           \n\
 																									\n\
 			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			vec3 SH(vec3 direction)                                                                 \n\
+			{                                                                                       \n\
+				float basis[9];                                                                     \n\
+																									\n\
+				float x = direction.x;                                                              \n\
+				float y = direction.y;                                                              \n\
+				float z = direction.z;                                                              \n\
+																									\n\
+				vec3 color = vec3(0.0f, 0.0f, 0.0f);                                                \n\
+																									\n\
+				basis[0] = 1.0f;                                                                    \n\
+																									\n\
+				basis[1] = y;                                                                       \n\
+				basis[2] = z;                                                                       \n\
+				basis[3] = x;                                                                       \n\
+																									\n\
+				basis[4] = (x * y);                                         						\n\
+				basis[5] = (y * z);                                                                 \n\
+				basis[6] = (z * z * 3.0f - 1.0f);                                                   \n\
+				basis[7] = (x * z);                                                                 \n\
+				basis[8] = (x * x - y * y);                                                         \n\
+																									\n\
+				for (int index = 0; index < 9; index++)                                             \n\
+				{                                                                                   \n\
+					color.r += _sh_red[index] * basis[index];                                       \n\
+					color.g += _sh_grn[index] * basis[index];                                       \n\
+					color.b += _sh_blu[index] * basis[index];                                       \n\
+				}                                                                                   \n\
+																									\n\
+				return color;                                                                       \n\
+			}                                                                                       \n\
 																									\n\
 			float RadicalInverse(uint bits)                                                         \n\
 			{                                                                                       \n\

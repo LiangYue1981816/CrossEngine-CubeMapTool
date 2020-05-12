@@ -191,6 +191,175 @@ static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float 
 	}
 }
 
+static BOOL NormalizeEnvMap(gli::texture2d &texNormalizeEnvMap, float *sh_red, float *sh_grn, float *sh_blu)
+{
+	static const GLchar *szShaderVertexCode =
+		"                                                                                           \n\
+			#version 330                                                                            \n\
+																									\n\
+			uniform mat4 _modelViewProjectionMatrix;                                                \n\
+																									\n\
+			attribute vec3 _position;                                                               \n\
+			attribute vec4 _texcoord;                                                               \n\
+																									\n\
+			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			void main()                                                                             \n\
+			{                                                                                       \n\
+				gl_Position = _modelViewProjectionMatrix*vec4(_position, 1.0);                      \n\
+				texcoord = _texcoord;                                                               \n\
+			}                                                                                       \n\
+		";
+
+	static const GLchar *szShaderFragmentCode =
+		"                                                                                           \n\
+			#version 330                                                                            \n\
+																									\n\
+			uniform float _sh_red[9];                                                               \n\
+			uniform float _sh_grn[9];                                                               \n\
+			uniform float _sh_blu[9];                                                               \n\
+																									\n\
+			uniform mat4 _texcoordMatrix;                                                           \n\
+			uniform sampler2D _envmap;                                                              \n\
+																									\n\
+			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			vec3 SH(vec3 direction)                                                                 \n\
+			{                                                                                       \n\
+				float basis[9];                                                                     \n\
+																									\n\
+				float x = direction.x;                                                              \n\
+				float y = direction.y;                                                              \n\
+				float z = direction.z;                                                              \n\
+																									\n\
+				vec3 color = vec3(0.0f, 0.0f, 0.0f);                                                \n\
+																									\n\
+				basis[0] = 1.0f;                                                                    \n\
+																									\n\
+				basis[1] = y;                                                                       \n\
+				basis[2] = z;                                                                       \n\
+				basis[3] = x;                                                                       \n\
+																									\n\
+				basis[4] = (x * y);                                         						\n\
+				basis[5] = (y * z);                                                                 \n\
+				basis[6] = (z * z * 3.0f - 1.0f);                                                   \n\
+				basis[7] = (x * z);                                                                 \n\
+				basis[8] = (x * x - y * y);                                                         \n\
+																									\n\
+				for (int index = 0; index < 9; index++)                                             \n\
+				{                                                                                   \n\
+					color.r += _sh_red[index] * basis[index];                                       \n\
+					color.g += _sh_grn[index] * basis[index];                                       \n\
+					color.b += _sh_blu[index] * basis[index];                                       \n\
+				}                                                                                   \n\
+																									\n\
+				return color;                                                                       \n\
+			}                                                                                       \n\
+																									\n\
+			vec3 SphericalToDirection(vec2 uv)													    \n\
+			{                                                                                       \n\
+				vec2 invAtan = vec2(2.0 * PI, 1.0 * PI);                                            \n\
+				uv -= 0.5;                                                                          \n\
+				uv *= invAtan;                                                                      \n\
+																									\n\
+				float x = sin(uv.x); 																\n\
+				float y = sin(uv.y); 																\n\
+				float z = cos(uv.x); 																\n\
+				float a = sqrt((1.0 - y * y) / (x * x + z * z)); 									\n\
+																									\n\
+				return vec3(x * a, y, z * a);                                                       \n\
+			}                                                                                       \n\
+																									\n\
+			void main()                                                                             \n\
+			{                                                                                       \n\
+				vec3 direction = SphericalToDirection(texcoord.xy);                                 \n\
+				direction = normalize(direction);                                                   \n\
+				vec3 sh = SH(direction.xyz);														\n\
+				vec3 color = pow(texture(envmap, texcoord.xy).rgb, vec3(1.0f / 2.2f));				\n\
+				gl_FragColor.rgb = color / sh;														\n\
+				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
+			}                                                                                       \n\
+		";
+
+	static const vertex vertices[4] = {
+		{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f } },
+		{ {  1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f } },
+		{ {  1.0f,  1.0f, 0.0f },{ 1.0f, 1.0f } },
+		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f } },
+	};
+	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
+
+	BOOL rcode = TRUE;
+
+	gli::gl GL(gli::gl::PROFILE_ES30);
+	gli::gl::format glFormat = GL.translate(texNormalizeEnvMap.format());
+
+	GLuint texture = 0;
+	if (GLCreateTexture2D(texNormalizeEnvMap, texture) == FALSE) goto ERR;
+	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
+	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
+	{
+		if (GLCreateFBO(texNormalizeEnvMap.extent().x, texNormalizeEnvMap.extent().y, texNormalizeEnvMap.format()) == FALSE) goto ERR;
+		{
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			{
+				glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+				glm::mat4 matModeViewProjection = matProjection * matModeView;
+
+				glViewport(0, 0, texNormalizeEnvMap.extent().x, texNormalizeEnvMap.extent().y);
+				glUseProgram(program);
+				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+				glBindBuffer(GL_ARRAY_BUFFER, vbo);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+				glEnableVertexAttribArray(attribLocationPosition);
+				glEnableVertexAttribArray(attribLocationTexcoord);
+				{
+					glVertexAttribPointer(attribLocationPosition, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)0);
+					glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
+
+					glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
+					glUniform1i(uniformLocationEnvmap, 0);
+					glUniform1fv(uniformLocationSHRed, 9, sh_red);
+					glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
+					glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
+
+					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+					glReadPixels(0, 0, texNormalizeEnvMap.extent().x, texNormalizeEnvMap.extent().y, glFormat.External, glFormat.Type, texNormalizeEnvMap.data(0, 0, 0));
+				}
+				glDisableVertexAttribArray(attribLocationPosition);
+				glDisableVertexAttribArray(attribLocationTexcoord);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glUseProgram(0);
+			}
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		}
+		GLDestroyFBO();
+	}
+
+	texNormalizeEnvMap = gli::flip(texNormalizeEnvMap);
+
+	goto RET;
+ERR:
+	rcode = FALSE;
+RET:
+	GLDestroyVBO();
+	GLDestroyFBO();
+	GLDestroyProgram();
+	GLDestroyTexture(texture);
+
+	return rcode;
+}
+
 static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	static const GLchar *szShaderVertexCode =

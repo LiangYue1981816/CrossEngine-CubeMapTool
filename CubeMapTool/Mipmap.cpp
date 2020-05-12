@@ -179,6 +179,12 @@ BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap,
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
+		float sh_red[9] = { 0.0f };
+		float sh_grn[9] = { 0.0f };
+		float sh_blu[9] = { 0.0f };
+
+		GenerateIrradianceEnvMapSH(texEnvMap, sh_red, sh_grn, sh_blu, samples);
+
 		for (int mipLevel = 0; mipLevel < (int)texEnvMipmap.levels(); mipLevel++) {
 			if (GLCreateFBO(texEnvMipmap.extent(mipLevel).x, texEnvMipmap.extent(mipLevel).y, texEnvMipmap.format()) == FALSE) goto ERR;
 			{
@@ -210,6 +216,9 @@ BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap,
 						glUniform1f(uniformLocationRoughness, mipLevel / (texEnvMipmap.levels() - 1.0f));
 						glUniform1ui(uniformLocationSamples, samples);
 						glUniform1i(uniformLocationEnvmap, 0);
+						glUniform1fv(uniformLocationSHRed, 9, sh_red);
+						glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
+						glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
 
 						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 						glReadPixels(0, 0, texEnvMipmap.extent(mipLevel).x, texEnvMipmap.extent(mipLevel).y, glFormat.External, glFormat.Type, texEnvMipmap.data(0, 0, mipLevel));
@@ -395,6 +404,12 @@ BOOL GenerateCubeMipmaps(gli::texture_cube &texCubeMap, gli::texture_cube &texCu
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
+		float sh_red[9] = { 0.0f };
+		float sh_grn[9] = { 0.0f };
+		float sh_blu[9] = { 0.0f };
+
+		GenerateIrradianceCubeMapSH(texCubeMap, sh_red, sh_grn, sh_blu, samples);
+
 		for (int mipLevel = 0; mipLevel < (int)texCubeMipmap.levels(); mipLevel++) {
 			if (GLCreateFBO(texCubeMipmap.extent(mipLevel).x, texCubeMipmap.extent(mipLevel).y, texCubeMipmap.format()) == FALSE) goto ERR;
 			{
@@ -434,6 +449,9 @@ BOOL GenerateCubeMipmaps(gli::texture_cube &texCubeMap, gli::texture_cube &texCu
 						glUniform1f(uniformLocationRoughness, mipLevel / (texCubeMipmap.levels() - 1.0f));
 						glUniform1ui(uniformLocationSamples, samples);
 						glUniform1i(uniformLocationCubemap, 0);
+						glUniform1fv(uniformLocationSHRed, 9, sh_red);
+						glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
+						glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
 
 						for (int index = 0; index < 6; index++)
 						{

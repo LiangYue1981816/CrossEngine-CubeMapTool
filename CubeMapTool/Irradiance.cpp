@@ -115,6 +115,20 @@ static glm::vec2 SphericalSampleing(glm::vec3 v)
 
 	return uv;
 }
+
+static glm::vec3 SphericalToDirection(glm::vec2 uv)
+{
+	glm::vec2 invAtan = glm::vec2(2.0 * PI, 1.0 * PI);
+	uv -= 0.5;
+	uv *= invAtan;
+
+	float x = sin(uv.x);
+	float y = sin(uv.y);
+	float z = cos(uv.x);
+	float a = sqrt((1.0 - y * y) / (x * x + z * z));
+
+	return glm::vec3(x * a, y, z * a);
+}
 #pragma endregion
 
 #pragma region IrradianceMap

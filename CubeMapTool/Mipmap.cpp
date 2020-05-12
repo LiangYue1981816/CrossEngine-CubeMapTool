@@ -143,12 +143,6 @@ BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap,
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
-		float sh_red[9] = { 0.0f };
-		float sh_grn[9] = { 0.0f };
-		float sh_blu[9] = { 0.0f };
-
-		GenerateIrradianceEnvMapSH(texEnvMap, sh_red, sh_grn, sh_blu, samples);
-
 		for (int mipLevel = 0; mipLevel < (int)texEnvMipmap.levels(); mipLevel++) {
 			if (GLCreateFBO(texEnvMipmap.extent(mipLevel).x, texEnvMipmap.extent(mipLevel).y, texEnvMipmap.format()) == FALSE) goto ERR;
 			{
@@ -329,12 +323,6 @@ BOOL GenerateCubeMipmaps(gli::texture_cube &texCubeMap, gli::texture_cube &texCu
 	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
 	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
 	{
-		float sh_red[9] = { 0.0f };
-		float sh_grn[9] = { 0.0f };
-		float sh_blu[9] = { 0.0f };
-
-		GenerateIrradianceCubeMapSH(texCubeMap, sh_red, sh_grn, sh_blu, samples);
-
 		for (int mipLevel = 0; mipLevel < (int)texCubeMipmap.levels(); mipLevel++) {
 			if (GLCreateFBO(texCubeMipmap.extent(mipLevel).x, texCubeMipmap.extent(mipLevel).y, texCubeMipmap.format()) == FALSE) goto ERR;
 			{

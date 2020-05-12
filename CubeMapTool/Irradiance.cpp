@@ -160,7 +160,7 @@ static void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *
 	}
 }
 
-void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+static void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
@@ -176,7 +176,7 @@ void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_red, fl
 	}
 }
 
-void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));

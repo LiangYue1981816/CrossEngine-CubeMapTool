@@ -2,6 +2,11 @@
 #include <windows.h>
 
 
+void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples);
+void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples);
+BOOL RenderNormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu);
+BOOL RenderNormalizeCubeMap(const gli::texture_cube &texCubeMap, gli::texture_cube &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu);
+
 BOOL GenerateEnvIrradianceMap(gli::texture2d &texEnvMap, gli::texture_cube &texIrrMap, int samples);
 BOOL GenerateCubeIrradianceMap(gli::texture_cube &texCubeMap, gli::texture_cube &texIrrMap, int samples);
 BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap, int samples);

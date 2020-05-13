@@ -160,7 +160,7 @@ static void SaveSH(const char *szFileName, float *sh_red, float *sh_grn, float *
 	}
 }
 
-static void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
@@ -176,7 +176,7 @@ static void GenerateIrradianceEnvMapSH(const gli::texture2d &texture, float *sh_
 	}
 }
 
-static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
+void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu, int samples)
 {
 	for (int index = 0; index < samples; index++) {
 		glm::vec3 direction = glm::normalize(Sampling(Hammersley(index, samples)));
@@ -191,7 +191,7 @@ static void GenerateIrradianceCubeMapSH(const gli::texture_cube &texture, float 
 	}
 }
 
-static BOOL RenderNormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
+BOOL RenderNormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2d &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\
@@ -364,7 +364,7 @@ RET:
 	return rcode;
 }
 
-static BOOL RenderNormalizeCubeMap(const gli::texture_cube &texCubeMap, gli::texture_cube &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
+BOOL RenderNormalizeCubeMap(const gli::texture_cube &texCubeMap, gli::texture_cube &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
 {
 	static const GLchar *szShaderVertexCode =
 		"                                                                                           \n\

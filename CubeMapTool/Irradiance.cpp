@@ -276,10 +276,8 @@ static BOOL RenderNormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2
 				vec3 direction = SphericalToDirection(texcoord.xy);                                 \n\
 				direction = normalize(direction);                                                   \n\
 				vec3 sh = SH(direction.xyz);														\n\
-																									\n\
 				vec2 uv = vec2(texcoord.x, 1.0f - texcoord.y);										\n\
 				vec3 color = pow(texture(_envmap, uv).rgb, vec3(1.0f / 2.2f));						\n\
-																									\n\
 				gl_FragColor.rgb = color / sh;														\n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
@@ -362,6 +360,87 @@ RET:
 	GLDestroyTexture(texture);
 
 	return rcode;
+}
+
+static BOOL RenderNormalizeCubeMap(const gli::texture_cube &texCubeMap, gli::texture_cube &texNormalizeMap, float *sh_red, float *sh_grn, float *sh_blu)
+{
+	static const GLchar *szShaderVertexCode =
+		"                                                                                           \n\
+			#version 330                                                                            \n\
+																									\n\
+			uniform mat4 _modelViewProjectionMatrix;                                                \n\
+																									\n\
+			attribute vec3 _position;                                                               \n\
+			attribute vec4 _texcoord;                                                               \n\
+																									\n\
+			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			void main()                                                                             \n\
+			{                                                                                       \n\
+				gl_Position = _modelViewProjectionMatrix*vec4(_position, 1.0);                      \n\
+				texcoord = _texcoord;                                                               \n\
+			}                                                                                       \n\
+		";
+
+	static const GLchar *szShaderFragmentCode =
+		"                                                                                           \n\
+			#version 330                                                                            \n\
+																									\n\
+			#define PI 3.1415926535897932384626433832795f                                           \n\
+																									\n\
+			uniform float _sh_red[9];                                                               \n\
+			uniform float _sh_grn[9];                                                               \n\
+			uniform float _sh_blu[9];                                                               \n\
+																									\n\
+			uniform sampler2D _envmap;                                                              \n\
+			uniform mat4 _texcoordMatrix;                                                           \n\
+																									\n\
+			varying vec4 texcoord;                                                                  \n\
+																									\n\
+			vec3 SH(vec3 direction)                                                                 \n\
+			{                                                                                       \n\
+				float basis[9];                                                                     \n\
+																									\n\
+				float x = direction.x;                                                              \n\
+				float y = direction.y;                                                              \n\
+				float z = direction.z;                                                              \n\
+																									\n\
+				vec3 color = vec3(0.0f, 0.0f, 0.0f);                                                \n\
+																									\n\
+				basis[0] = 1.0f;                                                                    \n\
+																									\n\
+				basis[1] = y;                                                                       \n\
+				basis[2] = z;                                                                       \n\
+				basis[3] = x;                                                                       \n\
+																									\n\
+				basis[4] = (x * y);                                         						\n\
+				basis[5] = (y * z);                                                                 \n\
+				basis[6] = (z * z * 3.0f - 1.0f);                                                   \n\
+				basis[7] = (x * z);                                                                 \n\
+				basis[8] = (x * x - y * y);                                                         \n\
+																									\n\
+				for (int index = 0; index < 9; index++)                                             \n\
+				{                                                                                   \n\
+					color.r += _sh_red[index] * basis[index];                                       \n\
+					color.g += _sh_grn[index] * basis[index];                                       \n\
+					color.b += _sh_blu[index] * basis[index];                                       \n\
+				}                                                                                   \n\
+																									\n\
+				return color;                                                                       \n\
+			}                                                                                       \n\
+																									\n\
+			void main()                                                                             \n\
+			{                                                                                       \n\
+				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
+				direction = normalize(direction);                                                   \n\
+				vec3 sh = SH(direction.xyz);														\n\
+				vec2 uv = vec2(texcoord.x, 1.0f - texcoord.y);										\n\
+				vec3 color = pow(texture(_envmap, uv).rgb, vec3(1.0f / 2.2f));						\n\
+				gl_FragColor.rgb = color / sh;														\n\
+				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
+			}                                                                                       \n\
+		";
+	return TRUE;
 }
 
 static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu)

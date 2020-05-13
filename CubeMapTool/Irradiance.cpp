@@ -443,7 +443,96 @@ static BOOL RenderNormalizeCubeMap(const gli::texture_cube &texCubeMap, gli::tex
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
 		";
-	return TRUE;
+	
+	static const vertex vertices[4] = {
+		{ { -1.0f, -1.0f, 0.0f },{ -1.0f, -1.0f } },
+		{ {  1.0f, -1.0f, 0.0f },{  1.0f, -1.0f } },
+		{ {  1.0f,  1.0f, 0.0f },{  1.0f,  1.0f } },
+		{ { -1.0f,  1.0f, 0.0f },{ -1.0f,  1.0f } },
+	};
+	static const unsigned short indices[6] = { 0, 1, 2, 2, 3, 0 };
+
+	BOOL rcode = TRUE;
+
+	gli::gl GL(gli::gl::PROFILE_ES30);
+	gli::gl::format glFormat = GL.translate(texNormalizeMap.format());
+
+	GLuint texture = 0;
+	if (GLCreateTextureCube(texCubeMap, texture) == FALSE) goto ERR;
+	if (GLCreateVBO(vertices, 4, indices, 6) == FALSE) goto ERR;
+	if (GLCreateProgram(szShaderVertexCode, szShaderFragmentCode) == FALSE) goto ERR;
+	{
+		if (GLCreateFBO(texNormalizeMap.extent().x, texNormalizeMap.extent().y, texNormalizeMap.format()) == FALSE) goto ERR;
+		{
+			glEnable(GL_TEXTURE_CUBE_MAP);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			{
+				glm::mat4 matModeView = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::mat4 matProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+				glm::mat4 matModeViewProjection = matProjection * matModeView;
+				glm::mat4 matTexcoords[6] = {
+					glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
+					glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(0.0f, 1.0f, 0.0f)),
+					glm::rotate(glm::mat4(), -PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
+					glm::rotate(glm::mat4(),  PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)),
+					glm::mat4(),
+					glm::rotate(glm::mat4(),  PI, glm::vec3(0.0f, 1.0f, 0.0f)),
+				};
+
+				glViewport(0, 0, texNormalizeMap.extent().x, texNormalizeMap.extent().y);
+				glUseProgram(program);
+				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+				glBindBuffer(GL_ARRAY_BUFFER, vbo);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+				glEnableVertexAttribArray(attribLocationPosition);
+				glEnableVertexAttribArray(attribLocationTexcoord);
+				{
+					glVertexAttribPointer(attribLocationPosition, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)0);
+					glVertexAttribPointer(attribLocationTexcoord, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)12);
+
+					glUniformMatrix4fv(uniformLocationModelViewProjectionMatrix, 1, GL_FALSE, (const float *)&matModeViewProjection);
+					glUniform1fv(uniformLocationSHRed, 9, sh_red);
+					glUniform1fv(uniformLocationSHGrn, 9, sh_grn);
+					glUniform1fv(uniformLocationSHBlu, 9, sh_blu);
+					glUniform1i(uniformLocationCubemap, 0);
+
+					for (int index = 0; index < 6; index++)
+					{
+						glUniformMatrix4fv(uniformLocationTexcoordMatrix, 1, GL_FALSE, (const float *)&matTexcoords[index]);
+						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+						glReadPixels(0, 0, texNormalizeMap.extent().x, texNormalizeMap.extent().y, glFormat.External, glFormat.Type, texNormalizeMap.data(0, index, 0));
+					}
+				}
+				glDisableVertexAttribArray(attribLocationPosition);
+				glDisableVertexAttribArray(attribLocationTexcoord);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glUseProgram(0);
+			}
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		}
+		GLDestroyFBO();
+	}
+
+	texNormalizeMap = gli::flip(texNormalizeMap);
+
+	goto RET;
+ERR:
+	rcode = FALSE;
+RET:
+	GLDestroyVBO();
+	GLDestroyFBO();
+	GLDestroyProgram();
+	GLDestroyTexture(texture);
+
+	return rcode;
 }
 
 static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float *sh_grn, float *sh_blu)
@@ -619,6 +708,10 @@ BOOL GenerateCubeIrradianceMap(gli::texture_cube &texCubeMap, gli::texture_cube 
 	GenerateIrradianceCubeMapSH(texCubeMap, sh_red, sh_grn, sh_blu, samples);
 	RenderIrradianceMap(texIrrMap, sh_red, sh_grn, sh_blu);
 	SaveSH("IrradianceSH.output", sh_red, sh_grn, sh_blu);
+
+	//gli::texture2d texNormalizeMap(texEnvMap.format(), texEnvMap.extent());
+	//RenderNormalizeEnvMap(texEnvMap, texNormalizeMap, sh_red, sh_grn, sh_blu);
+	//gli::save_dds(texNormalizeMap, "result.dds");
 
 	return TRUE;
 }

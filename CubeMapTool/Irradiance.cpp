@@ -514,6 +514,7 @@ static BOOL RenderIrradianceMap(gli::texture_cube &texture, float *sh_red, float
 			{                                                                                       \n\
 				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
 				direction.xyz = normalize(direction.xyz);                                           \n\
+																									\n\
 				gl_FragColor.rgb = SH(direction.xyz);                                               \n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\

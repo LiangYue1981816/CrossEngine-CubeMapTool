@@ -112,6 +112,7 @@ BOOL GenerateLutMap(gli::texture2d &texLutMap, int samples)
 		{                                                                                           \n\
 			float ndotv = texcoord.x;                                                               \n\
 			float roughness = texcoord.y;                                                           \n\
+																									\n\
 			gl_FragColor.rg = IntegrateBRDF(roughness, ndotv, _samples);                            \n\
 			gl_FragColor.ba = vec2(0.0, 1.0);                                                       \n\
 		}                                                                                           \n\

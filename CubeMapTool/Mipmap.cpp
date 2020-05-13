@@ -120,6 +120,7 @@ BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap,
 			{                                                                                       \n\
 				vec3 direction = SphericalToDirection(texcoord.xy);                                 \n\
 				direction = normalize(direction);                                                   \n\
+																									\n\
 				gl_FragColor.rgb = Sampling(_envmap, direction, _roughness, _samples);              \n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
@@ -300,6 +301,7 @@ BOOL GenerateCubeMipmaps(gli::texture_cube &texCubeMap, gli::texture_cube &texCu
 			{                                                                                       \n\
 				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
 				direction.xyz = normalize(direction.xyz);                                           \n\
+																									\n\
 				gl_FragColor.rgb = Sampling(_cubemap, direction.xyz, _roughness, _samples);         \n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\

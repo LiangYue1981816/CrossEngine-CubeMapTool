@@ -139,7 +139,7 @@ BOOL GenerateEnvMipmaps(gli::texture2d &texEnvMap, gli::texture2d &texEnvMipmap,
 	float sh_red[9] = { 0.0f };
 	float sh_grn[9] = { 0.0f };
 	float sh_blu[9] = { 0.0f };
-	gli::texture2d texNormalizeMap(gli::FORMAT_RGBA16_SFLOAT_PACK16, texEnvMap.extent());
+	gli::texture2d texNormalizeMap(gli::FORMAT_RGB32_SFLOAT_PACK32, texEnvMap.extent());
 	GenerateIrradianceEnvMapSH(texEnvMap, sh_red, sh_grn, sh_blu, 1024);
 	RenderNormalizeEnvMap(texEnvMap, texNormalizeMap, sh_red, sh_grn, sh_blu);
 
@@ -327,7 +327,7 @@ BOOL GenerateCubeMipmaps(gli::texture_cube &texCubeMap, gli::texture_cube &texCu
 	float sh_red[9] = { 0.0f };
 	float sh_grn[9] = { 0.0f };
 	float sh_blu[9] = { 0.0f };
-	gli::texture_cube texNormalizeMap(gli::FORMAT_RGBA16_SFLOAT_PACK16, texCubeMap.extent());
+	gli::texture_cube texNormalizeMap(gli::FORMAT_RGB32_SFLOAT_PACK32, texCubeMap.extent());
 	GenerateIrradianceCubeMapSH(texCubeMap, sh_red, sh_grn, sh_blu, 1024);
 	RenderNormalizeCubeMap(texCubeMap, texNormalizeMap, sh_red, sh_grn, sh_blu);
 

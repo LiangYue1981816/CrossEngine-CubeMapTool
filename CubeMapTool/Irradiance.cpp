@@ -275,9 +275,11 @@ static BOOL RenderNormalizeEnvMap(const gli::texture2d &texEnvMap, gli::texture2
 			{                                                                                       \n\
 				vec3 direction = SphericalToDirection(texcoord.xy);                                 \n\
 				direction = normalize(direction);                                                   \n\
+																									\n\
 				vec3 sh = SH(direction.xyz);														\n\
 				vec2 uv = vec2(texcoord.x, 1.0f - texcoord.y);										\n\
 				vec3 color = pow(texture(_envmap, uv).rgb, vec3(1.0f / 2.2f));						\n\
+																									\n\
 				gl_FragColor.rgb = color / sh;														\n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
@@ -392,7 +394,7 @@ static BOOL RenderNormalizeCubeMap(const gli::texture_cube &texCubeMap, gli::tex
 			uniform float _sh_grn[9];                                                               \n\
 			uniform float _sh_blu[9];                                                               \n\
 																									\n\
-			uniform sampler2D _envmap;                                                              \n\
+			uniform samplerCube _cubemap;                                                           \n\
 			uniform mat4 _texcoordMatrix;                                                           \n\
 																									\n\
 			varying vec4 texcoord;                                                                  \n\
@@ -433,9 +435,10 @@ static BOOL RenderNormalizeCubeMap(const gli::texture_cube &texCubeMap, gli::tex
 			{                                                                                       \n\
 				vec4 direction = _texcoordMatrix * vec4(texcoord.x, texcoord.y, 1.0f, 0.0f);        \n\
 				direction = normalize(direction);                                                   \n\
+																									\n\
 				vec3 sh = SH(direction.xyz);														\n\
-				vec2 uv = vec2(texcoord.x, 1.0f - texcoord.y);										\n\
-				vec3 color = pow(texture(_envmap, uv).rgb, vec3(1.0f / 2.2f));						\n\
+				vec3 color = pow(texture(_cubemap, direction).rgb, vec3(1.0f / 2.2f));				\n\
+																									\n\
 				gl_FragColor.rgb = color / sh;														\n\
 				gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(2.2f));                               \n\
 			}                                                                                       \n\
